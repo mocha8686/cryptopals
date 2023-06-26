@@ -1,6 +1,9 @@
+use std::ops::BitXor;
+
 use anyhow::Result;
 use base64::{engine::general_purpose, Engine};
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Data(Box<[u8]>);
 
 impl Data {
@@ -21,6 +24,22 @@ impl Data {
     }
 }
 
+impl BitXor for Data {
+    type Output = Data;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        assert_eq!(self.0.len(), rhs.0.len(), "Data lengths must match.");
+
+        let res = self
+            .0
+            .iter()
+            .zip(rhs.0.iter())
+            .map(|(lhs, rhs)| lhs ^ rhs)
+            .collect();
+        Self(res)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -33,6 +52,16 @@ mod tests {
             "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
         );
 
+        Ok(())
+    }
+
+    #[test]
+    fn fixed_xor() -> Result<()> {
+        let lhs = Data::from_hex("1c0111001f010100061a024b53535009181c")?;
+        let rhs = Data::from_hex("686974207468652062756c6c277320657965")?;
+        let expected = Data::from_hex("746865206b696420646f6e277420706c6179")?;
+
+        assert_eq!(lhs ^ rhs, expected);
         Ok(())
     }
 }
