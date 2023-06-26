@@ -8,6 +8,10 @@ impl Data {
         Ok(Self(hex::decode(data)?.into()))
     }
 
+    fn from_b64(data: &str) -> Result<Self> {
+        Ok(Self(general_purpose::STANDARD_NO_PAD.decode(data)?.into()))
+    }
+
     fn as_b64(&self) -> String {
         general_purpose::STANDARD_NO_PAD.encode(&self.0)
     }
