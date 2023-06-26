@@ -12,6 +12,10 @@ impl Data {
         Ok(Self(general_purpose::STANDARD_NO_PAD.decode(data)?.into()))
     }
 
+    fn as_hex(&self) -> String {
+        hex::encode(&self.0)
+    }
+
     fn as_b64(&self) -> String {
         general_purpose::STANDARD_NO_PAD.encode(&self.0)
     }
