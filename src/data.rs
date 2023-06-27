@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ops::BitXor, rc::Rc};
+use std::{borrow::Cow, fmt::Display, ops::BitXor, rc::Rc, str::FromStr};
 
 use anyhow::Result;
 use base64::{engine::general_purpose, Engine};
@@ -15,10 +15,6 @@ impl Data {
         Ok(Self(general_purpose::STANDARD_NO_PAD.decode(data)?.into()))
     }
 
-    pub fn from_str(data: &str) -> Self {
-        Self(data.as_bytes().into())
-    }
-
     pub fn bytes(&self) -> &[u8] {
         &self.0
     }
@@ -30,9 +26,22 @@ impl Data {
     pub fn as_b64(&self) -> String {
         general_purpose::STANDARD_NO_PAD.encode(&self.0)
     }
+}
 
-    pub fn as_str(&self) -> Option<&str> {
-        std::str::from_utf8(&self.0).ok()
+impl FromStr for Data {
+    type Err = std::convert::Infallible;
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        Ok(Self(s.as_bytes().into()))
+    }
+}
+
+impl Display for Data {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            std::str::from_utf8(&self.0).unwrap_or("[invalid utf-8]")
+        )
     }
 }
 
@@ -87,6 +96,8 @@ mod tests {
     fn fixed_xor() -> Result<()> {
         let lhs = Data::from_hex("1c0111001f010100061a024b53535009181c")?;
         let rhs = Data::from_hex("686974207468652062756c6c277320657965")?;
+
+        dbg!((&lhs ^ &rhs).to_string());
 
         assert_eq!(
             lhs ^ rhs,

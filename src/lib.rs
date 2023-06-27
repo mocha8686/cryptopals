@@ -54,9 +54,9 @@ fn score(data: &Data) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
-
     use super::*;
+    use anyhow::Result;
+    use std::str::FromStr;
 
     #[test]
     fn single_byte_xor_cipher() -> Result<()> {
@@ -65,7 +65,7 @@ mod tests {
 
         assert_eq!(
             guess_single_byte_xor(&data),
-            Data::from_str("Cooking MC's like a pound of bacon")
+            Data::from_str("Cooking MC's like a pound of bacon")?
         );
 
         Ok(())
