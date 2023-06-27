@@ -51,7 +51,7 @@ impl<T: Into<Rc<[u8]>>> From<T> for Data {
     }
 }
 
-impl BitXor for Data {
+impl BitXor for &Data {
     type Output = Data;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -73,7 +73,15 @@ impl BitXor for Data {
             .zip(rhs.into_iter())
             .map(|(lhs, rhs)| lhs ^ rhs)
             .collect();
-        Self(res)
+        Data(res)
+    }
+}
+
+impl BitXor for Data {
+    type Output = Data;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        &self ^ &rhs
     }
 }
 
