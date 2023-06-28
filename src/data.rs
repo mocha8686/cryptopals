@@ -109,6 +109,8 @@ mod tests {
             lhs ^ rhs,
             Data::from_hex("746865206b696420646f6e277420706c6179")?
         );
+
         Ok(())
     }
+
 }
