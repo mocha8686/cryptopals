@@ -32,13 +32,20 @@ static LETTER_FREQUENCIES: phf::Map<char, u64> = phf_map! {
     'z' => 007400,
 };
 
-fn guess_single_byte_xor(data: &Data) -> Data {
+fn guess_single_byte_xor(data: &Data) -> (Data, u64) {
     (u8::MIN..=u8::MAX)
         .map(|c| data.clone() ^ vec![c].into())
         .map(|data| {
             let score = score(&data);
             (data, score)
         })
+        .max_by_key(|(_, score)| score.to_owned())
+        .unwrap()
+}
+
+fn detect_single_byte_xor(data: &[Data]) -> Data {
+    data.into_iter()
+        .map(|data| guess_single_byte_xor(data))
         .max_by_key(|(_, score)| score.to_owned())
         .unwrap()
         .0
@@ -64,9 +71,24 @@ mod tests {
             Data::from_hex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")?;
 
         assert_eq!(
-            guess_single_byte_xor(&data),
+            guess_single_byte_xor(&data).0,
             Data::from_str("Cooking MC's like a pound of bacon")?
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn detect_single_character_xor() -> Result<()> {
+        let input = std::fs::read_to_string("./data/1/4.txt")?;
+        let data: Vec<Data> = input
+            .lines()
+            .map(|line| Data::from_hex(line).ok())
+            .flatten()
+            .collect();
+        let res = detect_single_byte_xor(&data);
+
+        assert_eq!(res, "Now that the party is jumping\n".parse()?);
 
         Ok(())
     }
