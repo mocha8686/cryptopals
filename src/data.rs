@@ -66,8 +66,6 @@ impl BitXor for &Data {
             *rhs.to_mut() = rhs.repeat((lhs_len as f64 / rhs_len as f64).ceil() as usize);
         }
 
-        assert_eq!(lhs.len(), rhs.len());
-
         let res = lhs
             .into_iter()
             .zip(rhs.into_iter())
