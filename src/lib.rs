@@ -148,7 +148,7 @@ fn score(data: &Data) -> u64 {
 mod tests {
     use super::*;
     use anyhow::Result;
-    use std::str::FromStr;
+    use std::{fs::read_to_string, str::FromStr};
 
     #[test]
     fn single_byte_xor_cipher() -> Result<()> {
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn detect_single_character_xor() -> Result<()> {
-        let input = std::fs::read_to_string("./data/1/4.txt")?;
+        let input = read_to_string("./data/1/4.txt")?;
         let data: Vec<Data> = input
             .lines()
             .map(|line| Data::from_hex(line).ok())
@@ -190,9 +190,7 @@ mod tests {
 
     #[test]
     fn break_repeating_key_xor_test() -> Result<()> {
-        let input = std::fs::read_to_string("./data/1/6.txt")?
-            .trim()
-            .replace("\n", "");
+        let input = read_to_string("./data/1/6.txt")?.trim().replace("\n", "");
         let data = Data::from_b64(&input)?;
         let res = break_repeating_key_xor(&data);
 
