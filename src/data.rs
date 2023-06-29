@@ -12,7 +12,7 @@ impl Data {
     }
 
     pub fn from_b64(data: &str) -> Result<Self> {
-        Ok(Self(general_purpose::STANDARD_NO_PAD.decode(data)?.into()))
+        Ok(Self(general_purpose::STANDARD.decode(data)?.into()))
     }
 
     pub fn bytes(&self) -> &[u8] {
@@ -24,7 +24,7 @@ impl Data {
     }
 
     pub fn as_b64(&self) -> String {
-        general_purpose::STANDARD_NO_PAD.encode(&self.0)
+        general_purpose::STANDARD.encode(&self.0)
     }
 }
 
