@@ -32,6 +32,22 @@ static LETTER_FREQUENCIES: phf::Map<char, u64> = phf_map! {
     'z' => 007400,
 };
 
+fn hamming_distance(lhs: &Data, rhs: &Data) -> usize {
+    assert_eq!(
+        lhs.bytes().len(),
+        rhs.bytes().len(),
+        "Data must be same size to get Hamming distance."
+    );
+
+    lhs.bytes()
+        .iter()
+        .cloned()
+        .zip(rhs.bytes().iter().cloned())
+        .map(|(lhs, rhs)| lhs ^ rhs)
+        .map(|byte| byte.count_ones() as usize)
+        .sum()
+}
+
 fn guess_single_byte_xor(data: &Data) -> (Data, u64) {
     (u8::MIN..=u8::MAX)
         .map(|c| data.clone() ^ vec![c].into())
@@ -89,6 +105,16 @@ mod tests {
         let res = detect_single_byte_xor(&data);
 
         assert_eq!(res, "Now that the party is jumping\n".parse()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn hamming_distance_test() -> Result<()> {
+        let lhs = "this is a test".parse()?;
+        let rhs = "wokka wokka!!!".parse()?;
+
+        assert_eq!(hamming_distance(&lhs, &rhs), 37);
 
         Ok(())
     }
