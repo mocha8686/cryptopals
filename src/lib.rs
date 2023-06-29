@@ -1,5 +1,8 @@
 mod data;
+
+use anyhow::Result;
 use data::Data;
+use openssl::symm::{self, Cipher};
 use phf::phf_map;
 
 const MAX_KEYSIZE: usize = 40;
@@ -145,6 +148,16 @@ fn score(data: &Data) -> u64 {
         .sum()
 }
 
+fn aes_128_ecb_decrypt<'a, 'key>(key: &Data, ciphertext: &Data) -> Result<Data> {
+    let cipher = Cipher::aes_128_ecb();
+    Ok(Data::from(symm::decrypt(
+        cipher,
+        key.bytes(),
+        None,
+        ciphertext.bytes(),
+    )?))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,6 +208,18 @@ mod tests {
         let input = read_to_string("./data/1/6.txt")?.trim().replace("\n", "");
         let data = Data::from_b64(&input)?;
         let res = break_repeating_key_xor(&data);
+
+        assert_eq!(res, FUNKY_MUSIC.parse()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn aes_128_ecb_test() -> Result<()> {
+        let input = read_to_string("./data/1/7.txt")?.trim().replace("\n", "");
+        let ciphertext = Data::from_b64(&input)?;
+        let key = "YELLOW SUBMARINE".parse()?;
+        let res = aes_128_ecb_decrypt(&key, &ciphertext)?;
 
         assert_eq!(res, FUNKY_MUSIC.parse()?);
 
