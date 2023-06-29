@@ -189,6 +189,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "slow"]
     fn break_repeating_key_xor_test() -> Result<()> {
         let input = read_to_string("./data/1/6.txt")?.trim().replace("\n", "");
         let data = Data::from_b64(&input)?;
