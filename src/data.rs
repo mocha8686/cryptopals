@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fmt::Display, ops::BitXor, rc::Rc, str::FromStr};
+use std::{borrow::Cow, cmp::Ordering, fmt::Display, ops::BitXor, rc::Rc, str::FromStr};
 
 use anyhow::Result;
 use base64::{engine::general_purpose, Engine};
@@ -60,15 +60,19 @@ impl BitXor for &Data {
 
         let lhs_len = lhs.len();
         let rhs_len = rhs.len();
-        if lhs_len < rhs_len {
-            *lhs.to_mut() = lhs.repeat((rhs_len as f64 / lhs_len as f64).ceil() as usize);
-        } else if rhs_len < lhs_len {
-            *rhs.to_mut() = rhs.repeat((lhs_len as f64 / rhs_len as f64).ceil() as usize);
+        match lhs_len.cmp(&rhs_len) {
+            Ordering::Less => {
+                *lhs.to_mut() = lhs.repeat((rhs_len as f64 / lhs_len as f64).ceil() as usize);
+            }
+            Ordering::Greater => {
+                *rhs.to_mut() = rhs.repeat((lhs_len as f64 / rhs_len as f64).ceil() as usize);
+            }
+            Ordering::Equal => {}
         }
 
         let res = lhs
-            .into_iter()
-            .zip(rhs.into_iter())
+            .iter()
+            .zip(rhs.iter())
             .map(|(lhs, rhs)| lhs ^ rhs)
             .collect();
         Data(res)
