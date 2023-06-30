@@ -2,6 +2,7 @@ mod data;
 
 use anyhow::Result;
 use data::Data;
+use itertools::Itertools;
 use openssl::symm::{self, Cipher};
 use phf::phf_map;
 
@@ -76,17 +77,13 @@ fn get_column(data: &Data, row_length: usize, column: usize) -> Box<[u8]> {
 }
 
 fn guess_keysizes(data: &Data) -> Box<[usize]> {
-    let mut keysize_guesses: Box<[(usize, usize)]> = (2..=MAX_KEYSIZE)
+    (2..=MAX_KEYSIZE)
         .map(|keysize| {
-            let chunks: Box<[&[u8]]> = data.bytes().chunks_exact(keysize).collect();
-            let windows = chunks.windows(2);
-
-            let hamming_distances: Box<[usize]> = windows
-                .map(|window| match window {
-                    &[lhs, rhs] => Some(hamming_distance(&lhs.into(), &rhs.into()) * 1000),
-                    _ => unreachable!(),
-                })
-                .flatten()
+            let hamming_distances: Box<[usize]> = data
+                .bytes()
+                .chunks_exact(keysize)
+                .tuple_windows()
+                .map(|(lhs, rhs)| hamming_distance(&lhs.into(), &rhs.into()) * 1000)
                 .collect();
 
             let average_hamming_distance =
@@ -95,13 +92,8 @@ fn guess_keysizes(data: &Data) -> Box<[usize]> {
 
             (keysize, normalized_hamming_distance)
         })
-        .collect();
-
-    keysize_guesses.sort_by_key(|(_, normalized_hamming_distance)| *normalized_hamming_distance);
-
-    keysize_guesses
-        .iter()
-        .map(|(keysize, _)| *keysize)
+        .sorted_by_key(|(_, normalized_hamming_distance)| *normalized_hamming_distance)
+        .map(|(keysize, _)| keysize)
         .collect()
 }
 
