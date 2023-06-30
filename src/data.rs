@@ -40,7 +40,7 @@ impl Display for Data {
         write!(
             f,
             "{}",
-            std::str::from_utf8(&self.0).unwrap_or("[invalid utf-8]")
+            std::str::from_utf8(&self.0).expect("Invalid utf-8")
         )
     }
 }
