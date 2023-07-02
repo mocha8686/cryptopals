@@ -56,10 +56,9 @@ fn pkcs_7_pad(data: &Data, blocksize: u8) -> Data {
 }
 
 fn aes_128_ecb_decrypt(key: &Data, ciphertext: &Data) -> Result<Data> {
-    let cipher = Cipher::aes_128_ecb();
     Ok(Data::from(symm::decrypt(
-        cipher,
         key.bytes(),
+        Cipher::aes_128_ecb(),
         None,
         ciphertext.bytes(),
     )?))
