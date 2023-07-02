@@ -55,10 +55,10 @@ fn pkcs_7_pad(data: &Data, blocksize: u8) -> Data {
     .into()
 }
 
-fn aes_128_ecb_decrypt(key: &Data, ciphertext: &Data) -> Result<Data> {
+fn aes_128_ecb_decrypt(key: &[u8; 16], ciphertext: &Data) -> Result<Data> {
     Ok(Data::from(symm::decrypt(
-        key.bytes(),
         Cipher::aes_128_ecb(),
+        key,
         None,
         ciphertext.bytes(),
     )?))
@@ -83,7 +83,7 @@ mod tests {
     fn aes_128_ecb_test() -> Result<()> {
         let input = read_to_string("./data/1/7.txt")?.trim().replace("\n", "");
         let ciphertext = Data::from_b64(&input)?;
-        let key = "YELLOW SUBMARINE".parse()?;
+        let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
         let res = aes_128_ecb_decrypt(&key, &ciphertext)?;
 
         assert_eq!(res, FUNKY_MUSIC.parse()?);
