@@ -64,6 +64,15 @@ fn aes_128_ecb_decrypt(key: &[u8; 16], ciphertext: &Data) -> Result<Data> {
     )?))
 }
 
+fn aes_128_ecb_encrypt(key: &[u8; 16], plaintext: &Data) -> Result<Data> {
+    Ok(Data::from(symm::encrypt(
+        Cipher::aes_128_ecb(),
+        key,
+        None,
+        plaintext.bytes(),
+    )?))
+}
+
 pub fn score(data: &Data) -> u64 {
     data.bytes()
         .iter()
@@ -85,8 +94,10 @@ mod tests {
         let ciphertext = Data::from_b64(&input)?;
         let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
         let res = aes_128_ecb_decrypt(&key, &ciphertext)?;
-
         assert_eq!(res, FUNKY_MUSIC.parse()?);
+
+        let encrypted_res = aes_128_ecb_encrypt(&key, &res)?;
+        assert_eq!(encrypted_res, ciphertext);
 
         Ok(())
     }
