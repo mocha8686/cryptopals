@@ -11,9 +11,7 @@ struct Aes128Ecb {
 
 impl Aes128Ecb {
     fn new(key: [u8; 16]) -> Self {
-        Self {
-            key,
-        }
+        Self { key }
     }
 }
 

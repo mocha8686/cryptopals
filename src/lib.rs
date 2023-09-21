@@ -48,4 +48,3 @@ pub fn score(data: &Data) -> u64 {
         .map(|c| LETTER_FREQUENCIES.get(&(c as char)).copied().unwrap_or(0))
         .sum()
 }
-
