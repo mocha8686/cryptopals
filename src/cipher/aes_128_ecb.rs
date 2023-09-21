@@ -44,7 +44,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn aes_128_ecb_test() -> Result<()> {
+    fn test() -> Result<()> {
         let input = include_str!("../../data/1/7.txt").trim().replace("\n", "");
         let ciphertext = Data::from_b64(&input)?;
 
@@ -61,7 +61,7 @@ mod tests {
     }
 
     #[test]
-    fn detect_aes_128_ecb() -> Result<()> {
+    fn detect() -> Result<()> {
         let input = include_str!("../../data/1/8.txt").trim().to_owned();
         let res = input
             .lines()
