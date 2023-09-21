@@ -107,11 +107,10 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use std::fs::read_to_string;
 
     #[test]
     fn aes_128_ecb_test() -> Result<()> {
-        let input = read_to_string("./data/1/7.txt")?.trim().replace("\n", "");
+        let input = include_str!("../data/1/7.txt").trim().replace("\n", "");
         let ciphertext = Data::from_b64(&input)?;
         let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
         let res = aes_128_ecb_decrypt(&key, &ciphertext)?;
@@ -125,7 +124,7 @@ mod tests {
 
     #[test]
     fn detect_aes_128_ecb() -> Result<()> {
-        let input = read_to_string("./data/1/8.txt")?.trim().to_owned();
+        let input = include_str!("../data/1/8.txt").trim().to_owned();
         let res = input
             .lines()
             .map(|line| Data::from_hex(line.trim()))
