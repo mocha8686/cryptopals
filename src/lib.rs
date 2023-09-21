@@ -41,10 +41,8 @@ static LETTER_FREQUENCIES: phf::Map<char, u64> = phf_map! {
     'z' =>   7_400,
 };
 
-fn pkcs_7_pad(data: &Data, blocksize: u8) -> Data {
-    let trailing_len: u8 = (data.bytes().len() % blocksize as usize)
-        .try_into()
-        .expect("Block size too large");
+fn pkcs7_pad(data: &Data, blocksize: u8) -> Data {
+    let trailing_len: u8 = (data.bytes().len() % blocksize as usize) as u8;
     let remaining_len = (blocksize - trailing_len) % blocksize;
 
     chain(
@@ -53,6 +51,30 @@ fn pkcs_7_pad(data: &Data, blocksize: u8) -> Data {
     )
     .collect::<Box<_>>()
     .into()
+}
+
+fn pkcs7_unpad(data: &Data) -> Option<Data> {
+    let bytes = data.bytes().clone();
+    let last_byte = bytes.last().copied().unwrap_or(0) as usize;
+
+    if last_byte > bytes.len() {
+        None
+    } else if !bytes
+        .iter()
+        .rev()
+        .take(last_byte)
+        .all(|&b| b as usize == last_byte)
+    {
+        None
+    } else {
+        Some(Data::from(
+            data.bytes()
+                .iter()
+                .take(bytes.len() - last_byte)
+                .copied()
+                .collect::<Vec<u8>>(),
+        ))
+    }
 }
 
 fn aes_128_ecb_decrypt(key: &[u8; 16], ciphertext: &Data) -> Result<Data> {
@@ -131,9 +153,9 @@ mod tests {
     }
 
     #[test]
-    fn pkcs_7_pad_test() -> Result<()> {
+    fn pkcs7_pad_test() -> Result<()> {
         assert_eq!(
-            pkcs_7_pad(&"YELLOW SUBMARINE".parse()?, 20),
+            pkcs7_pad(&"YELLOW SUBMARINE".parse()?, 20),
             "YELLOW SUBMARINE\x04\x04\x04\x04".parse()?
         );
 
