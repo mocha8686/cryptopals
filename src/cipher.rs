@@ -2,8 +2,8 @@ use anyhow::Result;
 
 use crate::data::Data;
 
-pub(crate) mod aes_128_cbc;
-pub(crate) mod aes_128_ecb;
+pub mod aes_128_cbc;
+pub mod aes_128_ecb;
 
 trait Cipher {
     const BLOCK_SIZE: u8;

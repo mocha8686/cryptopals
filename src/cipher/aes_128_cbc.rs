@@ -7,13 +7,13 @@ use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
 
 use super::Cipher;
 
-pub(crate) struct Aes128Cbc {
+pub struct Aes128Cbc {
     key: [u8; 16],
     iv: [u8; 16],
 }
 
 impl Aes128Cbc {
-    pub(crate) fn new(key: [u8; 16], iv: [u8; 16]) -> Self {
+    pub fn new(key: [u8; 16], iv: [u8; 16]) -> Self {
         Self { key, iv }
     }
 }

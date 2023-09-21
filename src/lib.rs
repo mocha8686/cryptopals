@@ -2,6 +2,7 @@
 
 pub(crate) mod cipher;
 pub(crate) mod data;
+pub(crate) mod oracle;
 pub(crate) mod pkcs7;
 mod xor;
 
@@ -41,7 +42,7 @@ static LETTER_FREQUENCIES: phf::Map<char, u64> = phf_map! {
     'z' =>   7_400,
 };
 
-pub fn score(data: &Data) -> u64 {
+fn score(data: &Data) -> u64 {
     data.bytes()
         .iter()
         .copied()

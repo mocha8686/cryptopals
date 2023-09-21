@@ -4,7 +4,7 @@ use itertools::chain;
 
 use crate::data::Data;
 
-pub(crate) fn pad(data: &Data, block_size: u8) -> Data {
+pub fn pad(data: &Data, block_size: u8) -> Data {
     let trailing_len: u8 = (data.bytes().len() % block_size as usize) as u8;
     let remaining_len = block_size - trailing_len;
 
@@ -16,7 +16,7 @@ pub(crate) fn pad(data: &Data, block_size: u8) -> Data {
     .into()
 }
 
-pub(crate) fn unpad(data: &Data) -> Cow<Data> {
+pub fn unpad(data: &Data) -> Cow<Data> {
     let data = Cow::Borrowed(data);
     let bytes = data.bytes().clone();
     let last_byte = bytes.last().copied().unwrap_or(0) as usize;

@@ -5,12 +5,12 @@ use crate::data::Data;
 
 use super::Cipher;
 
-pub(crate) struct Aes128Ecb {
+pub struct Aes128Ecb {
     key: [u8; 16],
 }
 
 impl Aes128Ecb {
-    pub(crate) fn new(key: [u8; 16]) -> Self {
+    pub fn new(key: [u8; 16]) -> Self {
         Self { key }
     }
 }
