@@ -43,6 +43,12 @@ impl Data {
     }
 }
 
+impl Default for Data {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FromStr for Data {
     type Err = std::convert::Infallible;
 
