@@ -57,13 +57,12 @@ fn pkcs7_unpad(data: &Data) -> Option<Data> {
     let bytes = data.bytes().clone();
     let last_byte = bytes.last().copied().unwrap_or(0) as usize;
 
-    if last_byte > bytes.len() {
-        None
-    } else if !bytes
-        .iter()
-        .rev()
-        .take(last_byte)
-        .all(|&b| b as usize == last_byte)
+    if last_byte > bytes.len()
+        || !bytes
+            .iter()
+            .rev()
+            .take(last_byte)
+            .all(|&b| b as usize == last_byte)
     {
         None
     } else {
