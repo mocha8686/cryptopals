@@ -30,6 +30,7 @@ impl Data {
 
 impl FromStr for Data {
     type Err = std::convert::Infallible;
+
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         Ok(Self(s.as_bytes().into()))
     }
@@ -37,11 +38,7 @@ impl FromStr for Data {
 
 impl Display for Data {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            std::str::from_utf8(&self.0).expect("Invalid utf-8")
-        )
+        write!(f, "{}", String::from_utf8_lossy(&self.0))
     }
 }
 
@@ -75,6 +72,7 @@ impl BitXor for &Data {
             .zip(rhs.iter())
             .map(|(lhs, rhs)| lhs ^ rhs)
             .collect();
+
         Data(res)
     }
 }
