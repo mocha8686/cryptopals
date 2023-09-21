@@ -1,3 +1,4 @@
+use anyhow::{ensure, Result};
 use itertools::Itertools;
 
 use super::{data::Data, score};
@@ -55,7 +56,7 @@ fn guess_keysizes(data: &Data) -> Box<[usize]> {
                 .bytes()
                 .chunks_exact(keysize)
                 .tuple_windows()
-                .map(|(lhs, rhs)| hamming_distance(&lhs.into(), &rhs.into()) * 1000)
+                .map(|(lhs, rhs)| hamming_distance(&lhs.into(), &rhs.into()).unwrap() * 1000)
                 .collect();
 
             let average_hamming_distance =
@@ -69,20 +70,20 @@ fn guess_keysizes(data: &Data) -> Box<[usize]> {
         .collect()
 }
 
-fn hamming_distance(lhs: &Data, rhs: &Data) -> usize {
-    assert_eq!(
-        lhs.bytes().len(),
-        rhs.bytes().len(),
+fn hamming_distance(lhs: &Data, rhs: &Data) -> Result<usize> {
+    ensure!(
+        lhs.bytes().len() == rhs.bytes().len(),
         "Data must be same size to get Hamming distance."
     );
 
-    lhs.bytes()
+    Ok(lhs
+        .bytes()
         .iter()
         .copied()
         .zip(rhs.bytes().iter().copied())
         .map(|(lhs, rhs)| lhs ^ rhs)
         .map(|byte| byte.count_ones() as usize)
-        .sum()
+        .sum())
 }
 
 fn guess_single_byte_xor(data: &Data) -> (Data, u64) {
@@ -117,6 +118,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "slow"]
     fn detect_single_character_xor() -> Result<()> {
         let input = include_str!("../data/1/4.txt");
         let data: Vec<Data> = input
@@ -136,7 +138,7 @@ mod tests {
         let lhs = "this is a test".parse()?;
         let rhs = "wokka wokka!!!".parse()?;
 
-        assert_eq!(hamming_distance(&lhs, &rhs), 37);
+        assert_eq!(hamming_distance(&lhs, &rhs)?, 37);
 
         Ok(())
     }

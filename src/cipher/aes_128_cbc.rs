@@ -1,0 +1,80 @@
+use std::rc::Rc;
+
+use anyhow::Result;
+use openssl::symm::{Crypter, Mode};
+
+use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
+
+use super::Cipher;
+
+pub(crate) struct Aes128Cbc {
+    key: [u8; 16],
+    iv: [u8; 16],
+}
+
+impl Aes128Cbc {
+    pub(crate) fn new(key: [u8; 16], iv: [u8; 16]) -> Self {
+        Self { key, iv }
+    }
+}
+
+impl Cipher for Aes128Cbc {
+    const BLOCK_SIZE: u8 = 16;
+
+    fn encrypt(&self, plaintext: &Data) -> Result<Data> {
+        let cipher = Aes128Ecb::new(self.key);
+        let padded = pkcs7::pad(plaintext, Self::BLOCK_SIZE);
+        let bytes = padded.bytes();
+        let (ciphertext, _) = bytes
+            .chunks_exact(Self::BLOCK_SIZE as usize)
+            .map(|chunk| Data::from(chunk))
+            .try_fold((Data::from(&self.iv[..]), Data::new()), |(prev, ciphertext), chunk| {
+                let xor_chunk = &prev ^ &chunk;
+                let ciphertext_chunk = cipher.encrypt(&xor_chunk)?;
+                anyhow::Ok((chunk, ciphertext + ciphertext_chunk))
+            })?;
+        Ok(ciphertext)
+    }
+
+    fn decrypt(&self, ciphertext: &Data) -> Result<Data> {
+        let decrypted = {
+            let mut decrypter = Crypter::new(openssl::symm::Cipher::aes_128_ecb(), Mode::Decrypt, &self.key, Some(&self.iv)).unwrap();
+            decrypter.pad(false);
+            let block_size = openssl::symm::Cipher::aes_128_ecb().block_size();
+            let mut decrypted = vec![0; ciphertext.len() + block_size];
+            let mut count = decrypter.update(ciphertext.bytes(), &mut decrypted).unwrap();
+            count += decrypter.finalize(&mut decrypted[count..]).unwrap();
+            decrypted.truncate(count);
+            Data::from(decrypted)
+        };
+
+        let xor = Data::from(self.iv[..].iter().chain(ciphertext.bytes().iter()).take(ciphertext.len()).cloned().collect::<Rc<_>>());
+        let xored = decrypted ^ xor;
+        let plaintext = pkcs7::unpad(&xored);
+        Ok(plaintext.into_owned())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{pkcs7::unpad, FUNKY_MUSIC};
+
+    use super::*;
+
+    #[test]
+    fn cryptopals_test() -> Result<()> {
+        let input = include_str!("../../data/2/10.txt").trim().replace("\n", "");
+        let ciphertext = Data::from_b64(&input)?;
+
+        let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
+        let iv = [0u8; 16];
+        let cipher = Aes128Cbc::new(key, iv);
+
+        let res = cipher.decrypt(&ciphertext)?;
+        let unpadded = unpad(&res);
+
+        assert_eq!(unpadded.into_owned(), FUNKY_MUSIC.parse()?);
+
+        Ok(())
+    }
+}

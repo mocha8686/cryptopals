@@ -4,9 +4,9 @@ use itertools::chain;
 
 use crate::data::Data;
 
-pub(crate) fn pad(data: &Data, blocksize: u8) -> Data {
-    let trailing_len: u8 = (data.bytes().len() % blocksize as usize) as u8;
-    let remaining_len = (blocksize - trailing_len) % blocksize;
+pub(crate) fn pad(data: &Data, block_size: u8) -> Data {
+    let trailing_len: u8 = (data.bytes().len() % block_size as usize) as u8;
+    let remaining_len = (block_size - trailing_len) % block_size;
 
     chain(
         data.bytes().iter().copied(),

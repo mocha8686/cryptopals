@@ -5,17 +5,19 @@ use crate::data::Data;
 
 use super::Cipher;
 
-struct Aes128Ecb {
+pub(crate) struct Aes128Ecb {
     key: [u8; 16],
 }
 
 impl Aes128Ecb {
-    fn new(key: [u8; 16]) -> Self {
+    pub(crate) fn new(key: [u8; 16]) -> Self {
         Self { key }
     }
 }
 
 impl Cipher for Aes128Ecb {
+    const BLOCK_SIZE: u8 = 16;
+
     fn encrypt(&self, plaintext: &Data) -> Result<crate::data::Data> {
         Ok(Data::from(symm::encrypt(
             OpenSslCipher::aes_128_ecb(),
@@ -44,7 +46,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() -> Result<()> {
+    fn cryptopals() -> Result<()> {
         let input = include_str!("../../data/1/7.txt").trim().replace("\n", "");
         let ciphertext = Data::from_b64(&input)?;
 
@@ -53,6 +55,18 @@ mod tests {
 
         let res = cipher.decrypt(&ciphertext)?;
         assert_eq!(res, FUNKY_MUSIC.parse()?);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test() -> Result<()> {
+        let input = include_str!("../../data/1/7.txt").trim().replace("\n", "");
+        let ciphertext = Data::from_b64(&input)?;
+
+        let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
+        let cipher = Aes128Ecb::new(key);
+        let res = cipher.decrypt(&ciphertext)?;
 
         let encrypted_res = cipher.encrypt(&res)?;
         assert_eq!(encrypted_res, ciphertext);

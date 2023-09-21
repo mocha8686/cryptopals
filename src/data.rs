@@ -1,4 +1,11 @@
-use std::{borrow::Cow, cmp::Ordering, fmt::Display, ops::BitXor, rc::Rc, str::FromStr};
+use std::{
+    borrow::Cow,
+    cmp::Ordering,
+    fmt::Display,
+    ops::{Add, BitXor},
+    rc::Rc,
+    str::FromStr,
+};
 
 use anyhow::Result;
 use base64::{engine::general_purpose, Engine};
@@ -7,6 +14,10 @@ use base64::{engine::general_purpose, Engine};
 pub struct Data(Rc<[u8]>);
 
 impl Data {
+    pub fn new() -> Self {
+        Self(Rc::new([]))
+    }
+
     pub fn from_hex(data: &str) -> Result<Self> {
         Ok(Self(hex::decode(data)?.into()))
     }
@@ -17,6 +28,10 @@ impl Data {
 
     pub fn bytes(&self) -> &[u8] {
         &self.0
+    }
+
+    pub fn len(&self) -> usize {
+        self.bytes().len()
     }
 
     pub fn as_hex(&self) -> String {
@@ -45,6 +60,28 @@ impl Display for Data {
 impl<T: Into<Rc<[u8]>>> From<T> for Data {
     fn from(value: T) -> Self {
         Self(value.into())
+    }
+}
+
+impl Add for &Data {
+    type Output = Data;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Data::from(
+            self.bytes()
+                .iter()
+                .chain(rhs.bytes().iter())
+                .cloned()
+                .collect::<Rc<_>>(),
+        )
+    }
+}
+
+impl Add for Data {
+    type Output = Data;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        &self + &rhs
     }
 }
 
