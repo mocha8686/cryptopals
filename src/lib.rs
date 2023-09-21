@@ -1,11 +1,11 @@
 #![allow(dead_code)]
-mod data;
+
+pub(crate) mod cipher;
+pub(crate) mod data;
+pub(crate) mod pkcs7;
 mod xor;
 
-use anyhow::Result;
 use data::Data;
-use itertools::chain;
-use openssl::symm::{self, Cipher};
 use phf::phf_map;
 
 #[cfg(test)]
@@ -41,59 +41,6 @@ static LETTER_FREQUENCIES: phf::Map<char, u64> = phf_map! {
     'z' =>   7_400,
 };
 
-fn pkcs7_pad(data: &Data, blocksize: u8) -> Data {
-    let trailing_len: u8 = (data.bytes().len() % blocksize as usize) as u8;
-    let remaining_len = (blocksize - trailing_len) % blocksize;
-
-    chain(
-        data.bytes().iter().copied(),
-        vec![remaining_len; remaining_len as usize],
-    )
-    .collect::<Box<_>>()
-    .into()
-}
-
-fn pkcs7_unpad(data: &Data) -> Option<Data> {
-    let bytes = data.bytes().clone();
-    let last_byte = bytes.last().copied().unwrap_or(0) as usize;
-
-    if last_byte > bytes.len()
-        || !bytes
-            .iter()
-            .rev()
-            .take(last_byte)
-            .all(|&b| b as usize == last_byte)
-    {
-        None
-    } else {
-        Some(Data::from(
-            data.bytes()
-                .iter()
-                .take(bytes.len() - last_byte)
-                .copied()
-                .collect::<Vec<u8>>(),
-        ))
-    }
-}
-
-fn aes_128_ecb_decrypt(key: &[u8; 16], ciphertext: &Data) -> Result<Data> {
-    Ok(Data::from(symm::decrypt(
-        Cipher::aes_128_ecb(),
-        key,
-        None,
-        ciphertext.bytes(),
-    )?))
-}
-
-fn aes_128_ecb_encrypt(key: &[u8; 16], plaintext: &Data) -> Result<Data> {
-    Ok(Data::from(symm::encrypt(
-        Cipher::aes_128_ecb(),
-        key,
-        None,
-        plaintext.bytes(),
-    )?))
-}
-
 pub fn score(data: &Data) -> u64 {
     data.bytes()
         .iter()
@@ -102,61 +49,3 @@ pub fn score(data: &Data) -> u64 {
         .sum()
 }
 
-#[cfg(test)]
-mod tests {
-    use itertools::Itertools;
-
-    use super::*;
-
-    #[test]
-    fn aes_128_ecb_test() -> Result<()> {
-        let input = include_str!("../data/1/7.txt").trim().replace("\n", "");
-        let ciphertext = Data::from_b64(&input)?;
-        let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
-        let res = aes_128_ecb_decrypt(&key, &ciphertext)?;
-        assert_eq!(res, FUNKY_MUSIC.parse()?);
-
-        let encrypted_res = aes_128_ecb_encrypt(&key, &res)?;
-        assert_eq!(encrypted_res, ciphertext);
-
-        Ok(())
-    }
-
-    #[test]
-    fn detect_aes_128_ecb() -> Result<()> {
-        let input = include_str!("../data/1/8.txt").trim().to_owned();
-        let res = input
-            .lines()
-            .map(|line| Data::from_hex(line.trim()))
-            .flatten()
-            .max_by_key(|data| {
-                data.bytes()
-                    .into_iter()
-                    .chunks(16)
-                    .into_iter()
-                    .map(|chunk| chunk.collect::<Box<_>>())
-                    .counts()
-                    .into_values()
-                    .map(|count| count - 1)
-                    .sum::<usize>()
-            })
-            .unwrap();
-
-        assert_eq!(
-            res,
-            Data::from_hex("d880619740a8a19b7840a8a31c810a3d08649af70dc06f4fd5d2d69c744cd283e2dd052f6b641dbf9d11b0348542bb5708649af70dc06f4fd5d2d69c744cd2839475c9dfdbc1d46597949d9c7e82bf5a08649af70dc06f4fd5d2d69c744cd28397a93eab8d6aecd566489154789a6b0308649af70dc06f4fd5d2d69c744cd283d403180c98c8f6db1f2a3f9c4040deb0ab51b29933f2c123c58386b06fba186a")?
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn pkcs7_pad_test() -> Result<()> {
-        assert_eq!(
-            pkcs7_pad(&"YELLOW SUBMARINE".parse()?, 20),
-            "YELLOW SUBMARINE\x04\x04\x04\x04".parse()?
-        );
-
-        Ok(())
-    }
-}
