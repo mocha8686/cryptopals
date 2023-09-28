@@ -43,7 +43,7 @@ mod tests {
 
     #[test]
     fn cryptopals() -> Result<()> {
-        let input = include_str!("../../data/1/7.txt").trim().replace("\n", "");
+        let input = include_str!("../../data/1/7.txt").trim().replace('\n', "");
         let ciphertext = Data::from_b64(&input)?;
 
         let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test() -> Result<()> {
-        let input = include_str!("../../data/1/7.txt").trim().replace("\n", "");
+        let input = include_str!("../../data/1/7.txt").trim().replace('\n', "");
         let ciphertext = Data::from_b64(&input)?;
 
         let key = "YELLOW SUBMARINE".as_bytes().try_into()?;
@@ -75,8 +75,7 @@ mod tests {
         let input = include_str!("../../data/1/8.txt").trim().to_owned();
         let res = input
             .lines()
-            .map(|line| Data::from_hex(line.trim()))
-            .flatten()
+            .flat_map(|line| Data::from_hex(line.trim()))
             .max_by_key(|data| count_repeating_blocks(data, 16))
             .unwrap();
 

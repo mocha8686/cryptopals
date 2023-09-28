@@ -6,7 +6,7 @@ use super::{data::Data, score};
 const MAX_KEYSIZE: usize = 40;
 const USE_FIRST_N_KEYSIZES: usize = 3;
 
-pub fn break_repeating_key_xor(data: &Data) -> Data {
+pub fn break_repeating_key(data: &Data) -> Data {
     let keysizes = guess_keysizes(data);
     keysizes[0..USE_FIRST_N_KEYSIZES]
         .iter()
@@ -14,7 +14,7 @@ pub fn break_repeating_key_xor(data: &Data) -> Data {
             let keysize = *keysize;
             let plaintext_columns: Box<_> = (0..keysize)
                 .map(|offset| get_column(data, keysize, offset))
-                .map(|ciphertext_column| guess_single_byte_xor(&ciphertext_column.into()).0)
+                .map(|ciphertext_column| guess_single_byte_key(&ciphertext_column.into()).0)
                 .collect();
 
             (0..plaintext_columns[0].bytes().len())
@@ -32,9 +32,9 @@ pub fn break_repeating_key_xor(data: &Data) -> Data {
         .unwrap()
 }
 
-pub fn detect_single_byte_xor(data: &[Data]) -> Data {
+pub fn detect_single_byte_key(data: &[Data]) -> Data {
     data.iter()
-        .map(guess_single_byte_xor)
+        .map(guess_single_byte_key)
         .max_by_key(|(_, score)| score.to_owned())
         .unwrap()
         .0
@@ -86,7 +86,7 @@ fn hamming_distance(lhs: &Data, rhs: &Data) -> Result<usize> {
         .sum())
 }
 
-fn guess_single_byte_xor(data: &Data) -> (Data, u64) {
+fn guess_single_byte_key(data: &Data) -> (Data, u64) {
     (u8::MIN..=u8::MAX)
         .map(|c| data.clone() ^ vec![c].into())
         .map(|data| {
@@ -105,12 +105,12 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn single_byte_xor_cipher() -> Result<()> {
+    fn single_byte_key_works() -> Result<()> {
         let data =
             Data::from_hex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")?;
 
         assert_eq!(
-            guess_single_byte_xor(&data).0,
+            guess_single_byte_key(&data).0,
             Data::from_str("Cooking MC's like a pound of bacon")?
         );
 
@@ -119,14 +119,13 @@ mod tests {
 
     #[test]
     #[ignore = "slow"]
-    fn detect_single_character_xor() -> Result<()> {
+    fn detect_single_byte_key_test() -> Result<()> {
         let input = include_str!("../data/1/4.txt");
         let data: Vec<Data> = input
             .lines()
-            .map(|line| Data::from_hex(line).ok())
-            .flatten()
+            .filter_map(|line| Data::from_hex(line).ok())
             .collect();
-        let res = detect_single_byte_xor(&data);
+        let res = detect_single_byte_key(&data);
 
         assert_eq!(res, "Now that the party is jumping\n".parse()?);
 
@@ -145,10 +144,10 @@ mod tests {
 
     #[test]
     #[ignore = "slow"]
-    fn break_repeating_key_xor_test() -> Result<()> {
-        let input = include_str!("../data/1/6.txt").trim().replace("\n", "");
+    fn break_repeating_key_test() -> Result<()> {
+        let input = include_str!("../data/1/6.txt").trim().replace('\n', "");
         let data = Data::from_b64(&input)?;
-        let res = break_repeating_key_xor(&data);
+        let res = break_repeating_key(&data);
 
         assert_eq!(res, FUNKY_MUSIC.parse()?);
 

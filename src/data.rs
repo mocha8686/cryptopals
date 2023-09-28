@@ -77,7 +77,7 @@ impl<T: Borrow<Data>> Add<T> for &Data {
             self.bytes()
                 .iter()
                 .chain(rhs.borrow().bytes().iter())
-                .cloned()
+                .copied()
                 .collect::<Rc<_>>(),
         )
     }
@@ -94,6 +94,7 @@ impl<T: Borrow<Data>> Add<T> for Data {
 impl BitXor for &Data {
     type Output = Data;
 
+    #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss, clippy::cast_sign_loss)]
     fn bitxor(self, rhs: Self) -> Self::Output {
         let mut lhs = Cow::from(&*self.0);
         let mut rhs = Cow::from(&*rhs.0);
@@ -110,13 +111,13 @@ impl BitXor for &Data {
             Ordering::Equal => {}
         }
 
-        let res = lhs
+        let xor_bytes = lhs
             .iter()
             .zip(rhs.iter())
             .map(|(lhs, rhs)| lhs ^ rhs)
             .collect();
 
-        Data(res)
+        Data(xor_bytes)
     }
 }
 

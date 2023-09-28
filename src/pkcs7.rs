@@ -4,6 +4,7 @@ use itertools::chain;
 
 use crate::data::Data;
 
+#[allow(clippy::cast_possible_truncation)]
 pub fn pad(data: &Data, block_size: u8) -> Data {
     let trailing_len: u8 = (data.bytes().len() % block_size as usize) as u8;
     let remaining_len = block_size - trailing_len;

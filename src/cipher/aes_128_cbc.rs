@@ -44,14 +44,16 @@ impl Cipher for Aes128Cbc {
             )
             .unwrap();
             decrypter.pad(false);
+
             let block_size = openssl::symm::Cipher::aes_128_ecb().block_size();
-            let mut decrypted = vec![0; ciphertext.len() + block_size];
+            let mut decrypted_bytes = vec![0; ciphertext.len() + block_size];
             let mut count = decrypter
-                .update(ciphertext.bytes(), &mut decrypted)
+                .update(ciphertext.bytes(), &mut decrypted_bytes)
                 .unwrap();
-            count += decrypter.finalize(&mut decrypted[count..]).unwrap();
-            decrypted.truncate(count);
-            Data::from(decrypted)
+            count += decrypter.finalize(&mut decrypted_bytes[count..]).unwrap();
+            decrypted_bytes.truncate(count);
+
+            Data::from(decrypted_bytes)
         };
 
         let xor = Data::from(
@@ -59,7 +61,7 @@ impl Cipher for Aes128Cbc {
                 .iter()
                 .chain(ciphertext.bytes().iter())
                 .take(ciphertext.len())
-                .cloned()
+                .copied()
                 .collect::<Rc<_>>(),
         );
         let xored = decrypted ^ xor;
@@ -76,7 +78,7 @@ mod tests {
 
     #[test]
     fn cryptopals_test() -> Result<()> {
-        let input = include_str!("../../data/2/10.txt").trim().replace("\n", "");
+        let input = include_str!("../../data/2/10.txt").trim().replace('\n', "");
         let ciphertext = Data::from_b64(&input)?;
 
         let key = "YELLOW SUBMARINE".as_bytes().try_into()?;

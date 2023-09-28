@@ -3,7 +3,8 @@ use rand::prelude::*;
 
 use crate::{
     cipher::{aes_128_cbc::Aes128Cbc, aes_128_ecb::Aes128Ecb, Cipher},
-    data::Data, FUNKY_MUSIC, 
+    data::Data,
+    FUNKY_MUSIC,
 };
 
 use super::{ecb_or_cbc, EcbOrCbc};
@@ -28,7 +29,10 @@ fn black_box(plaintext: &Data) -> (Data, EcbOrCbc) {
         .collect::<std::rc::Rc<_>>()
         .into();
 
-    (cipher.encrypt(&(prefix + plaintext + postfix)).unwrap(), oracle_result)
+    (
+        cipher.encrypt(&(prefix + plaintext + postfix)).unwrap(),
+        oracle_result,
+    )
 }
 
 #[test]

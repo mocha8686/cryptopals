@@ -7,10 +7,10 @@ use crate::data::Data;
 
 pub fn count_repeating_blocks(data: &Data, block_size: usize) -> usize {
     data.bytes()
-        .into_iter()
+        .iter()
         .chunks(block_size)
         .into_iter()
-        .map(|chunk| chunk.collect::<Box<_>>())
+        .map(Iterator::collect::<Box<_>>)
         .counts()
         .into_values()
         .map(|count| count - 1)
@@ -24,7 +24,7 @@ pub enum EcbOrCbc {
 }
 
 pub fn ecb_or_cbc(data: &Data) -> EcbOrCbc {
-    if count_repeating_blocks(&data, 16) > 0 {
+    if count_repeating_blocks(data, 16) > 0 {
         EcbOrCbc::Ecb
     } else {
         EcbOrCbc::Cbc
