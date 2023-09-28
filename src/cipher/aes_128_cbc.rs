@@ -19,23 +19,18 @@ impl Aes128Cbc {
 }
 
 impl Cipher for Aes128Cbc {
-    const BLOCK_SIZE: u8 = 16;
-
     fn encrypt(&self, plaintext: &Data) -> Result<Data> {
         let cipher = Aes128Ecb::new(self.key);
-        let padded = pkcs7::pad(plaintext, Self::BLOCK_SIZE);
+        let padded = pkcs7::pad(plaintext, 16);
         let bytes = padded.bytes();
-        let (ciphertext, _) = bytes
-            .chunks_exact(Self::BLOCK_SIZE as usize)
-            .map(Data::from)
-            .try_fold(
-                (Data::from(&self.iv[..]), Data::new()),
-                |(prev, ciphertext), chunk| {
-                    let xor_chunk = &prev ^ &chunk;
-                    let ciphertext_chunk = cipher.encrypt(&xor_chunk)?;
-                    anyhow::Ok((chunk, ciphertext + ciphertext_chunk))
-                },
-            )?;
+        let (ciphertext, _) = bytes.chunks_exact(16).map(Data::from).try_fold(
+            (Data::from(&self.iv[..]), Data::new()),
+            |(prev, ciphertext), chunk| {
+                let xor_chunk = &prev ^ &chunk;
+                let ciphertext_chunk = cipher.encrypt(&xor_chunk)?;
+                anyhow::Ok((chunk, ciphertext + ciphertext_chunk))
+            },
+        )?;
         Ok(ciphertext)
     }
 

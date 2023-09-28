@@ -16,8 +16,6 @@ impl Aes128Ecb {
 }
 
 impl Cipher for Aes128Ecb {
-    const BLOCK_SIZE: u8 = 16;
-
     fn encrypt(&self, plaintext: &Data) -> Result<crate::data::Data> {
         Ok(Data::from(symm::encrypt(
             OpenSslCipher::aes_128_ecb(),
@@ -39,9 +37,7 @@ impl Cipher for Aes128Ecb {
 
 #[cfg(test)]
 mod tests {
-    use itertools::Itertools;
-
-    use crate::FUNKY_MUSIC;
+    use crate::{oracle::count_repeating_blocks, FUNKY_MUSIC};
 
     use super::*;
 
@@ -81,17 +77,7 @@ mod tests {
             .lines()
             .map(|line| Data::from_hex(line.trim()))
             .flatten()
-            .max_by_key(|data| {
-                data.bytes()
-                    .into_iter()
-                    .chunks(16)
-                    .into_iter()
-                    .map(|chunk| chunk.collect::<Box<_>>())
-                    .counts()
-                    .into_values()
-                    .map(|count| count - 1)
-                    .sum::<usize>()
-            })
+            .max_by_key(|data| count_repeating_blocks(data, 16))
             .unwrap();
 
         assert_eq!(

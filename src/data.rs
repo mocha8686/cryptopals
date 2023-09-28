@@ -1,5 +1,5 @@
 use std::{
-    borrow::Cow,
+    borrow::{Borrow, Cow},
     cmp::Ordering,
     fmt::Display,
     ops::{Add, BitXor},
@@ -69,25 +69,25 @@ impl<T: Into<Rc<[u8]>>> From<T> for Data {
     }
 }
 
-impl Add for &Data {
+impl<T: Borrow<Data>> Add<T> for &Data {
     type Output = Data;
 
-    fn add(self, rhs: Self) -> Self::Output {
+    fn add(self, rhs: T) -> Self::Output {
         Data::from(
             self.bytes()
                 .iter()
-                .chain(rhs.bytes().iter())
+                .chain(rhs.borrow().bytes().iter())
                 .cloned()
                 .collect::<Rc<_>>(),
         )
     }
 }
 
-impl Add for Data {
+impl<T: Borrow<Data>> Add<T> for Data {
     type Output = Data;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        &self + &rhs
+    fn add(self, rhs: T) -> Self::Output {
+        &self + rhs
     }
 }
 
