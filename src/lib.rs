@@ -2,6 +2,7 @@
 
 pub(crate) mod cipher;
 pub(crate) mod data;
+pub(crate) mod decrypt;
 pub(crate) mod oracle;
 pub(crate) mod pkcs7;
 mod xor;
