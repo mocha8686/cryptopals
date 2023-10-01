@@ -91,13 +91,17 @@ impl<T: Borrow<Data>> Add<T> for Data {
     }
 }
 
-impl BitXor for &Data {
+impl<T: Borrow<Data>> BitXor<T> for &Data {
     type Output = Data;
 
-    #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss, clippy::cast_sign_loss)]
-    fn bitxor(self, rhs: Self) -> Self::Output {
+    #[allow(
+        clippy::cast_possible_truncation,
+        clippy::cast_precision_loss,
+        clippy::cast_sign_loss
+    )]
+    fn bitxor(self, rhs: T) -> Self::Output {
         let mut lhs = Cow::from(&*self.0);
-        let mut rhs = Cow::from(&*rhs.0);
+        let mut rhs = Cow::from(&*rhs.borrow().0);
 
         let lhs_len = lhs.len();
         let rhs_len = rhs.len();
@@ -121,11 +125,11 @@ impl BitXor for &Data {
     }
 }
 
-impl BitXor for Data {
+impl<T: Borrow<Data>> BitXor<T> for Data {
     type Output = Data;
 
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        &self ^ &rhs
+    fn bitxor(self, rhs: T) -> Self::Output {
+        &self ^ rhs
     }
 }
 

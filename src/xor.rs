@@ -52,7 +52,7 @@ fn hamming_distance(lhs: &Data, rhs: &Data) -> Result<usize> {
 
 pub fn guess_single_byte_key(data: &Data) -> (Data, u64) {
     (u8::MIN..=u8::MAX)
-        .map(|c| data.clone() ^ vec![c].into())
+        .map(|c| data.clone() ^ Data::from(vec![c]))
         .map(|data| {
             let score = score(&data);
             (data, score)
