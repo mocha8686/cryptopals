@@ -43,8 +43,9 @@ pub fn unpad(data: &Data) -> Cow<Data> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use anyhow::Result;
+
+    use super::*;
 
     #[test]
     fn pad_test() -> Result<()> {

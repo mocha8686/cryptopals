@@ -18,11 +18,11 @@ impl Data {
     }
 
     pub fn from_hex(data: &str) -> Result<Self> {
-        Ok(Self(hex::decode(data)?.into()))
+        Ok(Self(hex::decode(data)?))
     }
 
     pub fn from_b64(data: &str) -> Result<Self> {
-        Ok(Self(general_purpose::STANDARD.decode(data)?.into()))
+        Ok(Self(general_purpose::STANDARD.decode(data)?))
     }
 
     pub fn bytes(&self) -> &[u8] {

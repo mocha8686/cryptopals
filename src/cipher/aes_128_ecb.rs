@@ -1,9 +1,8 @@
 use anyhow::Result;
 use openssl::symm::{self, Cipher as OpenSslCipher};
 
-use crate::data::Data;
-
 use super::Cipher;
+use crate::data::Data;
 
 pub struct Aes128Ecb {
     key: [u8; 16],
@@ -37,9 +36,8 @@ impl Cipher for Aes128Ecb {
 
 #[cfg(test)]
 mod tests {
-    use crate::{oracle::count_repeating_blocks, FUNKY_MUSIC};
-
     use super::*;
+    use crate::{oracle::count_repeating_blocks, FUNKY_MUSIC};
 
     #[test]
     fn cryptopals() -> Result<()> {

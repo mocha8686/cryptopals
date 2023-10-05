@@ -2,9 +2,8 @@ use anyhow::Result;
 use itertools::Itertools;
 use openssl::symm::{Crypter, Mode};
 
-use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
-
 use super::Cipher;
+use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
 
 pub struct Aes128Cbc {
     key: [u8; 16],
@@ -71,9 +70,8 @@ impl Cipher for Aes128Cbc {
 
 #[cfg(test)]
 mod tests {
-    use crate::{pkcs7::unpad, FUNKY_MUSIC};
-
     use super::*;
+    use crate::{pkcs7::unpad, FUNKY_MUSIC};
 
     #[test]
     fn cryptopals_test() -> Result<()> {
