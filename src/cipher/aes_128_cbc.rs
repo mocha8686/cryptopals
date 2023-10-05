@@ -2,7 +2,7 @@ use anyhow::Result;
 use itertools::Itertools;
 use openssl::symm::{Crypter, Mode};
 
-use super::Cipher;
+use super::{Decrypt, Encrypt};
 use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
 
 pub struct Aes128Cbc {
@@ -16,7 +16,7 @@ impl Aes128Cbc {
     }
 }
 
-impl Cipher for Aes128Cbc {
+impl Encrypt for Aes128Cbc {
     fn encrypt(&self, plaintext: &Data) -> Result<Data> {
         let cipher = Aes128Ecb::new(self.key);
         let padded = pkcs7::pad(plaintext, 16);
@@ -31,7 +31,9 @@ impl Cipher for Aes128Cbc {
         )?;
         Ok(ciphertext)
     }
+}
 
+impl Decrypt for Aes128Cbc {
     fn decrypt(&self, ciphertext: &Data) -> Result<Data> {
         let decrypted = {
             let mut decrypter = Crypter::new(

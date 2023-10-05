@@ -4,7 +4,7 @@ use rand::prelude::*;
 
 use super::{ecb_or_cbc, EcbOrCbc};
 use crate::{
-    cipher::{aes_128_cbc::Aes128Cbc, aes_128_ecb::Aes128Ecb, Cipher},
+    cipher::{aes_128_cbc::Aes128Cbc, aes_128_ecb::Aes128Ecb, Encrypt},
     data::Data,
     FUNKY_MUSIC,
 };
@@ -13,7 +13,7 @@ const NUM_TESTS: usize = 1000;
 
 fn black_box(plaintext: &Data) -> (Data, EcbOrCbc) {
     let key: [u8; 16] = rand::random();
-    let (cipher, oracle_result): (Box<dyn Cipher>, _) = if rand::random() {
+    let (cipher, oracle_result): (Box<dyn Encrypt>, _) = if rand::random() {
         (Box::new(Aes128Ecb::new(key)), EcbOrCbc::Ecb)
     } else {
         let iv: [u8; 16] = rand::random();

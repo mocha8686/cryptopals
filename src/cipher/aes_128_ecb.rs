@@ -1,9 +1,12 @@
+pub mod prefix;
+
 use anyhow::Result;
 use openssl::symm::{self, Cipher as OpenSslCipher};
 
 use super::Cipher;
 use crate::data::Data;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Aes128Ecb {
     key: [u8; 16],
 }
@@ -14,7 +17,7 @@ impl Aes128Ecb {
     }
 }
 
-impl Cipher for Aes128Ecb {
+impl Encrypt for Aes128Ecb {
     fn encrypt(&self, plaintext: &Data) -> Result<crate::data::Data> {
         Ok(Data::from(symm::encrypt(
             OpenSslCipher::aes_128_ecb(),
@@ -23,7 +26,9 @@ impl Cipher for Aes128Ecb {
             plaintext.bytes(),
         )?))
     }
+}
 
+impl Decrypt for Aes128Ecb {
     fn decrypt(&self, ciphertext: &Data) -> Result<Data> {
         Ok(Data::from(symm::decrypt(
             OpenSslCipher::aes_128_ecb(),
