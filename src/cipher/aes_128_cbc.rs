@@ -1,6 +1,5 @@
-use std::rc::Rc;
-
 use anyhow::Result;
+use itertools::Itertools;
 use openssl::symm::{Crypter, Mode};
 
 use crate::{cipher::aes_128_ecb::Aes128Ecb, data::Data, pkcs7};
@@ -62,7 +61,7 @@ impl Cipher for Aes128Cbc {
                 .chain(ciphertext.bytes().iter())
                 .take(ciphertext.len())
                 .copied()
-                .collect::<Rc<_>>(),
+                .collect_vec(),
         );
         let xored = decrypted ^ xor;
         let plaintext = pkcs7::unpad(&xored);

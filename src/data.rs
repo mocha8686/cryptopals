@@ -3,7 +3,6 @@ use std::{
     cmp::Ordering,
     fmt::Display,
     ops::{Add, BitXor},
-    rc::Rc,
     str::FromStr,
 };
 
@@ -11,11 +10,11 @@ use anyhow::Result;
 use base64::{engine::general_purpose, Engine};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Data(Rc<[u8]>);
+pub struct Data(Vec<u8>);
 
 impl Data {
     pub fn new() -> Self {
-        Self(Rc::new([]))
+        Self(vec![])
     }
 
     pub fn from_hex(data: &str) -> Result<Self> {
@@ -63,7 +62,7 @@ impl Display for Data {
     }
 }
 
-impl<T: Into<Rc<[u8]>>> From<T> for Data {
+impl<T: Into<Vec<u8>>> From<T> for Data {
     fn from(value: T) -> Self {
         Self(value.into())
     }
@@ -78,7 +77,7 @@ impl<T: Borrow<Data>> Add<T> for &Data {
                 .iter()
                 .chain(rhs.borrow().bytes().iter())
                 .copied()
-                .collect::<Rc<_>>(),
+                .collect::<Vec<_>>(),
         )
     }
 }

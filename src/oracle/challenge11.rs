@@ -1,13 +1,13 @@
 use anyhow::Result;
+use itertools::Itertools;
 use rand::prelude::*;
 
+use super::{ecb_or_cbc, EcbOrCbc};
 use crate::{
     cipher::{aes_128_cbc::Aes128Cbc, aes_128_ecb::Aes128Ecb, Cipher},
     data::Data,
     FUNKY_MUSIC,
 };
-
-use super::{ecb_or_cbc, EcbOrCbc};
 
 const NUM_TESTS: usize = 1000;
 
@@ -22,11 +22,11 @@ fn black_box(plaintext: &Data) -> (Data, EcbOrCbc) {
 
     let prefix: Data = (0..=(thread_rng().gen_range(5..=10)))
         .map(|_| random())
-        .collect::<std::rc::Rc<_>>()
+        .collect_vec()
         .into();
     let postfix: Data = (0..=(thread_rng().gen_range(5..=10)))
         .map(|_| random())
-        .collect::<std::rc::Rc<_>>()
+        .collect_vec()
         .into();
 
     (
