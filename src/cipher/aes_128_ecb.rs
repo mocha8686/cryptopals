@@ -3,7 +3,7 @@ pub mod prefix;
 use anyhow::Result;
 use openssl::symm::{self, Cipher as OpenSslCipher};
 
-use super::Cipher;
+use super::{Decrypt, Encrypt};
 use crate::data::Data;
 
 #[derive(Debug, Clone, Copy)]
