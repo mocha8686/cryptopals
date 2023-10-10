@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod challenge11;
-
 use itertools::Itertools;
 
 use crate::data::Data;

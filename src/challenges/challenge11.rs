@@ -2,11 +2,10 @@ use anyhow::Result;
 use itertools::Itertools;
 use rand::prelude::*;
 
-use super::{ecb_or_cbc, EcbOrCbc};
 use crate::{
     cipher::{aes_128_cbc::Aes128Cbc, aes_128_ecb::Aes128Ecb, Encrypt},
     data::Data,
-    FUNKY_MUSIC,
+    FUNKY_MUSIC, oracle::{EcbOrCbc, ecb_or_cbc},
 };
 
 const NUM_TESTS: usize = 1000;
