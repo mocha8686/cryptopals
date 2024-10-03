@@ -7,7 +7,7 @@ const Data = struct {
 
     const Self = @This();
 
-    fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
+    pub fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
         if (hex_str.len % 2 != 0) {
             return error.BadLength;
         }
@@ -22,7 +22,7 @@ const Data = struct {
         };
     }
 
-    fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
+    pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
         const decoder = std.base64.standard.Decoder;
         const len = try decoder.calcSizeForSlice(base64_str);
         const data = try allocator.alloc(u8, len);
@@ -33,7 +33,18 @@ const Data = struct {
         };
     }
 
-    fn hex(self: *const Self) ![]const u8 {
+    const DataString = struct {
+        data: []const u8,
+        allocator: Allocator,
+
+        const InnerSelf = @This();
+
+        pub fn deinit(self: *const InnerSelf) void {
+            self.allocator.free(self.data);
+        }
+    };
+
+    fn hex(self: *const Self) !DataString {
         const len = self.data.len * 2;
         const buf = try self.allocator.alloc(u8, len);
         const charset = "0123456789abcdef";
@@ -41,15 +52,21 @@ const Data = struct {
             buf[i * 2 + 0] = charset[b >> 4];
             buf[i * 2 + 1] = charset[b & 15];
         }
-        return buf;
+        return DataString{
+            .data = buf,
+            .allocator = self.allocator,
+        };
     }
 
-    fn base64(self: *const Self) ![]const u8 {
+    fn base64(self: *const Self) !DataString {
         const encoder = std.base64.standard.Encoder;
         const len = encoder.calcSize(self.data.len);
         const buf = try self.allocator.alloc(u8, len);
         _ = encoder.encode(buf, self.data);
-        return buf;
+        return DataString{
+            .data = buf,
+            .allocator = self.allocator,
+        };
     }
 
     fn deinit(self: *const Self) void {
@@ -65,12 +82,12 @@ test "challenge 1" {
     const hex_to_base64 = try Data.fromHex(allocator, hex);
     defer hex_to_base64.deinit();
     const test_base64 = try hex_to_base64.base64();
-    defer allocator.free(test_base64);
-    try std.testing.expectEqualStrings(base64, test_base64);
+    defer test_base64.deinit();
+    try std.testing.expectEqualStrings(base64, test_base64.data);
 
     const base64_to_hex = try Data.fromBase64(allocator, base64);
     defer base64_to_hex.deinit();
     const test_hex = try base64_to_hex.hex();
-    defer allocator.free(test_hex);
-    try std.testing.expectEqualStrings(hex, test_hex);
+    defer test_hex.deinit();
+    try std.testing.expectEqualStrings(hex, test_hex.data);
 }
