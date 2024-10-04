@@ -18,7 +18,7 @@ pub const Data = struct {
     }
 
     pub fn new(allocator: Allocator, data: []const u8) !Self {
-        const buf = try allocator.alloc(data.len);
+        const buf = try allocator.alloc(u8, data.len);
         @memcpy(buf, data);
         return Self.init(allocator, buf);
     }
@@ -49,7 +49,7 @@ pub const Data = struct {
         };
     }
 
-    pub fn xor(self: *const Self, other: *const Self) !Self {
+    pub fn xor(self: *Self, other: *const Self) !void {
         return xorLib.xor(self, other);
     }
 

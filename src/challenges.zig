@@ -26,19 +26,18 @@ test "challenge 1" {
 }
 
 test "challenge 2" {
-    const lhs = try Data.fromHex(allocator, "1c0111001f010100061a024b53535009181c");
+    var lhs = try Data.fromHex(allocator, "1c0111001f010100061a024b53535009181c");
     const rhs = try Data.fromHex(allocator, "686974207468652062756c6c277320657965");
 
     defer lhs.deinit();
     defer rhs.deinit();
 
-    const res = try lhs.xor(&rhs);
-    const res_str = try res.hex();
+    try lhs.xor(&rhs);
 
+    const res = try lhs.hex();
     defer res.deinit();
-    defer res_str.deinit();
 
-    try std.testing.expectEqualStrings("746865206b696420646f6e277420706c6179", res_str.data);
+    try std.testing.expectEqualStrings("746865206b696420646f6e277420706c6179", res.data);
 }
 
 test "challenge 3" {
@@ -47,7 +46,6 @@ test "challenge 3" {
 
     const res = try data.guess_repeating_key_xor();
     defer res.deinit();
-
     try std.testing.expectEqualStrings("Cooking MC's like a pound of bacon", res.data);
 }
 
@@ -87,14 +85,15 @@ test "challenge 5" {
     const plaintext = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
     const key = "ICE";
 
-    const plaintext_data = Data.init(allocator, plaintext);
+    var plaintext_data = try Data.new(allocator, plaintext);
+    defer plaintext_data.deinit();
     const key_data = Data.init(allocator, key);
 
-    const ciphertext_data = try plaintext_data.xor(&key_data);
-    defer ciphertext_data.deinit();
+    try plaintext_data.xor(&key_data);
 
-    const hex_str = try ciphertext_data.hex();
+    const hex_str = try plaintext_data.hex();
     defer hex_str.deinit();
+
     try std.testing.expectEqualStrings(
         "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f",
         hex_str.data,
