@@ -5,12 +5,12 @@ const scoreLib = @import("score.zig");
 const Allocator = std.mem.Allocator;
 
 pub const Data = struct {
-    data: []u8,
+    data: []const u8,
     allocator: Allocator,
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator, data: []u8) Self {
+    pub fn init(allocator: Allocator, data: []const u8) Self {
         return Self{
             .data = data,
             .allocator = allocator,

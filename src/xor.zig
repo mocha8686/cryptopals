@@ -5,13 +5,12 @@ const Allocator = std.mem.Allocator;
 const Data = dataLib.Data;
 
 pub fn xor(lhs: *const Data, rhs: *const Data) !Data {
-    if (lhs.data.len != rhs.data.len) {
-        return error.LengthMismatch;
-    }
-
     const allocator = lhs.allocator;
-    const buf = try allocator.alloc(u8, lhs.data.len);
-    for (lhs.data, rhs.data, 0..) |l, r, i| {
+    const len = @max(lhs.data.len, rhs.data.len);
+    const buf = try allocator.alloc(u8, len);
+    for (0..len) |i| {
+        const l = lhs.data[i % lhs.data.len];
+        const r = rhs.data[i % rhs.data.len];
         buf[i] = l ^ r;
     }
 
