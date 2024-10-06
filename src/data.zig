@@ -57,8 +57,8 @@ pub const Data = struct {
         return scoreLib.score(self);
     }
 
-    pub fn guess_repeating_key_xor(self: *const Self) !Self {
-        return xorLib.guess_repeating_key_xor(self.allocator, self);
+    pub fn guessSingleByteXor(self: *const Self) !Self {
+        return xorLib.guessSingleByteXor(self.allocator, self);
     }
 
     const DataString = struct {

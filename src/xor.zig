@@ -18,7 +18,7 @@ pub fn xor(lhs: *Data, rhs: *const Data) !void {
     lhs.data = buf;
 }
 
-pub fn guess_repeating_key_xor(allocator: Allocator, ciphertext: *const Data) !Data {
+pub fn guessSingleByteXor(allocator: Allocator, ciphertext: *const Data) !Data {
     var max_score: isize = 0;
     var best_guess: ?Data = null;
 

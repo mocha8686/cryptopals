@@ -22,9 +22,16 @@ pub fn build(b: *std.Build) void {
     const challenge_unit_tests = b.addTest(.{ .root_source_file = b.path("src/challenges.zig"), .target = target, .optimize = optimize });
     const run_challenge_unit_tests = b.addRunArtifact(challenge_unit_tests);
 
+    const slow_challenge_unit_tests = b.addTest(.{ .root_source_file = b.path("src/challenges_slow.zig"), .target = target, .optimize = optimize });
+    const run_slow_challenge_unit_tests = b.addRunArtifact(slow_challenge_unit_tests);
+
     const test_step = b.step("test", "Run unit tests.");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_challenge_unit_tests.step);
+
+    if (b.option(bool, "slow", "Include slow unit tests.") orelse false) {
+        test_step.dependOn(&run_slow_challenge_unit_tests.step);
+    }
 
     const clap = b.dependency("clap", .{});
 
