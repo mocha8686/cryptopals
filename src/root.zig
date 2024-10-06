@@ -1,5 +1,3 @@
-const std = @import("std");
-
-pub fn main() !void {
-    std.debug.print("Hello, {s}!\n", .{"world"});
-}
+pub const data = @import("./data.zig");
+pub const score = @import("./score.zig");
+pub const xor = @import("./xor.zig");
