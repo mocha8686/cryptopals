@@ -49,6 +49,16 @@ pub const Data = struct {
         };
     }
 
+    pub fn hammingDistance(self: *const Self, other: *const Self) usize {
+        if (self.data.len != other.data.len) @panic("Cannot get hamming distance of differently-sized data.");
+
+        var distance: usize = 0;
+        for (self.data, other.data) |l, r| {
+            distance += count_ones(l ^ r);
+        }
+        return distance;
+    }
+
     pub fn xor(self: *Self, other: *const Self) !void {
         return xorLib.xor(self, other);
     }
@@ -59,6 +69,10 @@ pub const Data = struct {
 
     pub fn guessSingleByteXor(self: *const Self) !Self {
         return xorLib.guessSingleByteXor(self.allocator, self);
+    }
+
+    pub fn breakRepeatingKeyXor(self: *const Self) !Self {
+        return xorLib.breakRepeatingKeyXor(self.allocator, self);
     }
 
     const DataString = struct {
@@ -101,3 +115,21 @@ pub const Data = struct {
         self.allocator.free(self.data);
     }
 };
+
+fn count_ones(byte: u8) u8 {
+    var sum: u8 = 0;
+    for (0..7) |i| sum += (byte >> @intCast(i) & 1);
+    return sum;
+}
+
+test "hamming distance" {
+    const allocator = std.testing.allocator;
+
+    const lhs = try Data.new(allocator, "this is a test");
+    defer lhs.deinit();
+
+    const rhs = try Data.new(allocator, "wokka wokka!!!");
+    defer rhs.deinit();
+
+    try std.testing.expectEqual(37, lhs.hammingDistance(&rhs));
+}

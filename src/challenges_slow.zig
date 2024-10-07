@@ -35,3 +35,17 @@ test "challenge 4" {
 
     try std.testing.expectEqualStrings("Now that the party is jumping\n", final_guess.data);
 }
+
+test "challenge 6" {
+    const text = @embedFile("data/1/6.txt");
+    const ciphertext = try std.mem.replaceOwned(u8, allocator, text, "\n", "");
+    defer allocator.free(ciphertext);
+
+    const data = try Data.fromBase64(allocator, ciphertext);
+    defer data.deinit();
+
+    const plaintext = try data.breakRepeatingKeyXor();
+    defer plaintext.deinit();
+
+    try std.testing.expectEqualStrings(@embedFile("data/1/6-sol.txt"), plaintext.data);
+}
