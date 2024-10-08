@@ -1,8 +1,7 @@
 const std = @import("std");
-const dataLib = @import("data.zig");
+const Data = @import("Data.zig");
 
 const Allocator = std.mem.Allocator;
-const Data = dataLib.Data;
 
 pub fn xor(lhs: *Data, rhs: *const Data) !void {
     const allocator = lhs.allocator;

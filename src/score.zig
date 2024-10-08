@@ -1,7 +1,5 @@
 const std = @import("std");
-const dataLib = @import("data.zig");
-
-const Data = dataLib.Data;
+const Data = @import("Data.zig");
 
 const frequencies = std.StaticStringMap(isize).initComptime(.{
     .{ "e", 12700 },

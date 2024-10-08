@@ -1,8 +1,7 @@
 const std = @import("std");
-const dataLib = @import("data.zig");
+const Data = @import("Data.zig");
 
 const allocator = std.testing.allocator;
-const Data = dataLib.Data;
 
 test "challenge 4" {
     const challenge_text = @embedFile("data/1/4.txt");

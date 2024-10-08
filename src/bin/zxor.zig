@@ -2,7 +2,7 @@ const std = @import("std");
 const cryptopals = @import("cryptopals");
 const clap = @import("clap");
 
-const Data = cryptopals.data.Data;
+const Data = cryptopals.Data;
 const Allocator = std.mem.Allocator;
 
 pub fn main() !void {

@@ -1,8 +1,7 @@
 const std = @import("std");
-const dataLib = @import("data.zig");
+const Data = @import("Data.zig");
 
 const allocator = std.testing.allocator;
-const Data = dataLib.Data;
 
 test "challenge 1" {
     const hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
