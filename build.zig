@@ -29,7 +29,7 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_challenge_unit_tests.step);
 
-    if (b.option(bool, "slow", "Include slow unit tests.") orelse false) {
+    if (b.option(bool, "slow", "Include slow unit tests") orelse false) {
         test_step.dependOn(&run_slow_challenge_unit_tests.step);
     }
 

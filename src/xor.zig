@@ -3,7 +3,7 @@ const Data = @import("Data.zig");
 
 const Allocator = std.mem.Allocator;
 
-pub fn xor(lhs: *Data, rhs: *const Data) !void {
+pub fn xor(lhs: *Data, rhs: Data) !void {
     const allocator = lhs.allocator;
     const len = @max(lhs.data.len, rhs.data.len);
     const buf = try allocator.alloc(u8, len);
@@ -17,7 +17,7 @@ pub fn xor(lhs: *Data, rhs: *const Data) !void {
     lhs.data = buf;
 }
 
-pub fn guessSingleByteXor(allocator: Allocator, ciphertext: *const Data) !Data {
+pub fn guessSingleByteXor(allocator: Allocator, ciphertext: Data) !Data {
     var max_score: isize = 0;
     var best_guess: ?Data = null;
 
@@ -43,7 +43,7 @@ pub fn guessSingleByteXor(allocator: Allocator, ciphertext: *const Data) !Data {
     return best_guess orelse unreachable;
 }
 
-pub fn breakRepeatingKeyXor(allocator: Allocator, ciphertext: *const Data) !Data {
+pub fn breakRepeatingKeyXor(allocator: Allocator, ciphertext: Data) !Data {
     const len = ciphertext.data.len;
     const keysize = try guessKeysize(allocator, ciphertext);
 
@@ -86,7 +86,7 @@ pub fn breakRepeatingKeyXor(allocator: Allocator, ciphertext: *const Data) !Data
     return Data.init(allocator, plaintext);
 }
 
-fn guessKeysize(allocator: Allocator, ciphertext: *const Data) !usize {
+fn guessKeysize(allocator: Allocator, ciphertext: Data) !usize {
     const len = ciphertext.data.len;
 
     if (len < 4) {
@@ -105,7 +105,7 @@ fn guessKeysize(allocator: Allocator, ciphertext: *const Data) !usize {
             const stride = keysize_guess;
             const lhs = Data.init(allocator, ciphertext.data[offset .. offset + stride]);
             const rhs = Data.init(allocator, ciphertext.data[offset + stride .. offset + (stride * 2)]);
-            hamming_distance += lhs.hammingDistance(&rhs);
+            hamming_distance += lhs.hammingDistance(rhs);
             n += 1;
         }
         hamming_distance /= n * keysize_guess;

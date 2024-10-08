@@ -30,7 +30,7 @@ const frequencies = std.StaticStringMap(isize).initComptime(.{
     .{ "z", 7400 },
 });
 
-pub fn score(data: *const Data) isize {
+pub fn score(data: Data) isize {
     var total_score: isize = 0;
     for (data.data) |b| {
         if (std.ascii.isAlphanumeric(b)) {

@@ -64,7 +64,7 @@ pub fn main() !void {
     var data = Data.init(allocator, buf);
     const key = try Data.new(allocator, key_str);
 
-    try data.xor(&key);
+    try data.xor(key);
 
     const stdout = std.io.getStdOut();
     try stdout.writeAll(data.data);

@@ -48,7 +48,7 @@ pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
     };
 }
 
-pub fn hammingDistance(self: *const Self, other: *const Self) usize {
+pub fn hammingDistance(self: Self, other: Self) usize {
     if (self.data.len != other.data.len) @panic("Cannot get hamming distance of differently-sized data.");
 
     var distance: usize = 0;
@@ -58,19 +58,19 @@ pub fn hammingDistance(self: *const Self, other: *const Self) usize {
     return distance;
 }
 
-pub fn xor(self: *Self, other: *const Self) !void {
+pub fn xor(self: *Self, other: Self) !void {
     return xorLib.xor(self, other);
 }
 
-pub fn score(self: *const Self) isize {
+pub fn score(self: Self) isize {
     return scoreLib.score(self);
 }
 
-pub fn guessSingleByteXor(self: *const Self) !Self {
+pub fn guessSingleByteXor(self: Self) !Self {
     return xorLib.guessSingleByteXor(self.allocator, self);
 }
 
-pub fn breakRepeatingKeyXor(self: *const Self) !Self {
+pub fn breakRepeatingKeyXor(self: Self) !Self {
     return xorLib.breakRepeatingKeyXor(self.allocator, self);
 }
 
@@ -78,14 +78,12 @@ const DataString = struct {
     data: []const u8,
     allocator: Allocator,
 
-    const InnerSelf = @This();
-
-    pub fn deinit(self: *const InnerSelf) void {
+    pub fn deinit(self: @This()) void {
         self.allocator.free(self.data);
     }
 };
 
-pub fn hex(self: *const Self) !DataString {
+pub fn hex(self: Self) !DataString {
     const len = self.data.len * 2;
     const buf = try self.allocator.alloc(u8, len);
     const charset = "0123456789abcdef";
@@ -99,7 +97,7 @@ pub fn hex(self: *const Self) !DataString {
     };
 }
 
-pub fn base64(self: *const Self) !DataString {
+pub fn base64(self: Self) !DataString {
     const encoder = std.base64.standard.Encoder;
     const len = encoder.calcSize(self.data.len);
     const buf = try self.allocator.alloc(u8, len);
@@ -110,7 +108,7 @@ pub fn base64(self: *const Self) !DataString {
     };
 }
 
-pub fn deinit(self: *const Self) void {
+pub fn deinit(self: Self) void {
     self.allocator.free(self.data);
 }
 
@@ -129,5 +127,5 @@ test "hamming distance" {
     const rhs = try Self.new(allocator, "wokka wokka!!!");
     defer rhs.deinit();
 
-    try std.testing.expectEqual(37, lhs.hammingDistance(&rhs));
+    try std.testing.expectEqual(37, lhs.hammingDistance(rhs));
 }

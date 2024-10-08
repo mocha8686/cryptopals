@@ -3,7 +3,7 @@ const Data = @import("Data.zig");
 
 const allocator = std.testing.allocator;
 
-test "challenge 4" {
+test "set 1 challenge 4" {
     const challenge_text = @embedFile("data/1/4.txt");
     const trimmed = std.mem.trim(u8, challenge_text, " \n\r\t");
     var iter = std.mem.splitSequence(u8, trimmed, "\n");
@@ -35,7 +35,7 @@ test "challenge 4" {
     try std.testing.expectEqualStrings("Now that the party is jumping\n", final_guess.data);
 }
 
-test "challenge 6" {
+test "set 1 challenge 6" {
     const text = @embedFile("data/1/6.txt");
     const ciphertext = try std.mem.replaceOwned(u8, allocator, text, "\n", "");
     defer allocator.free(ciphertext);
