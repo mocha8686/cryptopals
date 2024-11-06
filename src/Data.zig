@@ -1,8 +1,10 @@
 const std = @import("std");
 const xorLib = @import("xor.zig");
 const scoreLib = @import("score.zig");
+const cipherLib = @import("cipher.zig");
 
 const Allocator = std.mem.Allocator;
+const Cipher = cipherLib.Cipher;
 
 data: []const u8,
 allocator: Allocator,
@@ -46,6 +48,14 @@ pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
         .data = data,
         .allocator = allocator,
     };
+}
+
+pub fn decrypt(self: *Self, cipher: Cipher) !void {
+    return cipherLib.decrypt(self, cipher);
+}
+
+pub fn encrypt(self: *Self, cipher: Cipher) !void {
+    return cipherLib.encrypt(self, cipher);
 }
 
 pub fn hammingDistance(self: Self, other: Self) usize {

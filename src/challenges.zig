@@ -1,6 +1,8 @@
 const std = @import("std");
 const Data = @import("Data.zig");
 
+const aes = std.crypto.core.aes;
+
 const allocator = std.testing.allocator;
 
 test "set 1 challenge 1" {
@@ -64,5 +66,21 @@ test "set 1 challenge 5" {
     try std.testing.expectEqualStrings(
         "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f",
         hex_str.data,
+    );
+}
+
+test "set 1 challenge 7" {
+    const text = @embedFile("data/1/7.txt");
+    const ciphertext = try std.mem.replaceOwned(u8, allocator, text, "\n", "");
+    defer allocator.free(ciphertext);
+
+    var data = try Data.fromBase64(allocator, ciphertext);
+    defer data.deinit();
+
+    try data.decrypt(.{ .aes_128_ecb = .{ .key = "YELLOW SUBMARINE".* } });
+
+    try std.testing.expectEqualStrings(
+        @embedFile("data/1/7-sol.txt"),
+        data.data,
     );
 }
