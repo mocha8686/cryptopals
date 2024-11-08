@@ -84,3 +84,42 @@ test "set 1 challenge 7" {
         data.data,
     );
 }
+
+test "set 1 challenge 8" {
+    const challenge_text = @embedFile("data/1/8.txt");
+    const trimmed = std.mem.trim(u8, challenge_text, " \n\r\t");
+    var iter = std.mem.splitSequence(u8, trimmed, "\n");
+
+    var max_score: usize = 0;
+    var best_guess: ?Data = null;
+
+    while (iter.next()) |hex_str| {
+        const data = try Data.fromHex(allocator, hex_str);
+        const score = try data.aesEcb128Score();
+
+        if (score > max_score) {
+            if (best_guess) |old_guess| {
+                old_guess.deinit();
+            }
+            max_score = score;
+            best_guess = data;
+        } else {
+            data.deinit();
+        }
+    }
+
+    const guess = &best_guess.?;
+    defer guess.deinit();
+
+    const hex_str = try guess.hex();
+    defer hex_str.deinit();
+
+    try std.testing.expectEqualStrings(
+        "d880619740a8a19b7840a8a31c810a3d08649af70dc06f4fd5d2d69c744cd283e2dd052f6b641dbf9d11b0348542bb5708649af70dc06f4fd5d2d69c744cd2839475c9dfdbc1d46597949d9c7e82bf5a08649af70dc06f4fd5d2d69c744cd28397a93eab8d6aecd566489154789a6b0308649af70dc06f4fd5d2d69c744cd283d403180c98c8f6db1f2a3f9c4040deb0ab51b29933f2c123c58386b06fba186a",
+        hex_str.data,
+    );
+    try std.testing.expectEqual(
+        6,
+        max_score,
+    );
+}

@@ -84,6 +84,10 @@ pub fn breakRepeatingKeyXor(self: Self) !Self {
     return xorLib.breakRepeatingKeyXor(self.allocator, self);
 }
 
+pub fn aesEcb128Score(self: Self) !usize {
+    return cipherLib.aesEcb128Score(self);
+}
+
 const DataString = struct {
     data: []const u8,
     allocator: Allocator,
