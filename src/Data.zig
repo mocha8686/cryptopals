@@ -58,6 +58,10 @@ pub fn encrypt(self: *Self, cipher: Cipher) !void {
     return cipherLib.encrypt(self, cipher);
 }
 
+pub fn pad(self: *Self, block_size: u8) !void {
+    return cipherLib.pad(self, block_size);
+}
+
 pub fn hammingDistance(self: Self, other: Self) usize {
     if (self.data.len != other.data.len) @panic("Cannot get hamming distance of differently-sized data.");
 

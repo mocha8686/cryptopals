@@ -123,3 +123,11 @@ test "set 1 challenge 8" {
         max_score,
     );
 }
+
+test "set 2 challenge 9" {
+    var data = try Data.new(allocator, "YELLOW SUBMARINE");
+    defer data.deinit();
+
+    try data.pad(20);
+    try std.testing.expectEqualStrings("YELLOW SUBMARINE\x04\x04\x04\x04", data.data);
+}

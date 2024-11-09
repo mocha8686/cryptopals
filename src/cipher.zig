@@ -67,6 +67,22 @@ pub fn encrypt(data: *Data, cipher: Cipher) !void {
     }
 }
 
+// PKCS#7 padding scheme.
+pub fn pad(data: *Data, block_size: u8) !void {
+    const len = data.data.len;
+    const padding_len: u8 = @intCast(block_size - len % block_size);
+    if (padding_len == 0) return;
+
+    const allocator = data.allocator;
+
+    var buf = try allocator.alloc(u8, len + padding_len);
+    @memcpy(buf[0..len], data.data);
+    @memset(buf[len..], padding_len);
+
+    allocator.free(data.data);
+    data.data = buf;
+}
+
 pub fn aesEcb128Score(data: Data) !usize {
     if (data.data.len % 16 != 0) {
         return error.InvalidDataLength;
