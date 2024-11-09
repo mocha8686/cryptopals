@@ -1,5 +1,7 @@
 const std = @import("std");
 const Data = @import("Data.zig");
+const blackbox = @import("blackbox.zig");
+const oracle = @import("oracle.zig");
 
 const aes = std.crypto.core.aes;
 
@@ -142,4 +144,22 @@ test "set 2 challenge 10" {
     try data.decrypt(.{ .aes_128_cbc = .{ .key = "YELLOW SUBMARINE".*, .iv = "\x00".* ** 16 } });
 
     try std.testing.expectEqualStrings(@embedFile("data/2/10-sol.txt"), data.data);
+}
+
+test "set 2 challenge 11" {
+    for (0..10) |_| {
+        const data = try blackbox.aesEcbOrCbc(allocator, .ecb);
+        defer data.deinit();
+
+        const res = try oracle.aesOracle(data);
+        try std.testing.expectEqual(.ecb, res);
+    }
+
+    for (0..10) |_| {
+        const data = try blackbox.aesEcbOrCbc(allocator, .cbc);
+        defer data.deinit();
+
+        const res = try oracle.aesOracle(data);
+        try std.testing.expectEqual(.cbc, res);
+    }
 }

@@ -1,5 +1,7 @@
 const std = @import("std");
 const Data = @import("Data.zig");
+const blackbox = @import("blackbox.zig");
+const oracle = @import("oracle.zig");
 
 const allocator = std.testing.allocator;
 
@@ -47,4 +49,22 @@ test "set 1 challenge 6" {
     defer plaintext.deinit();
 
     try std.testing.expectEqualStrings(@embedFile("data/1/6-sol.txt"), plaintext.data);
+}
+
+test "set 2 challenge 11 x100" {
+    for (0..100) |_| {
+        const data = try blackbox.aesEcbOrCbc(allocator, .ecb);
+        defer data.deinit();
+
+        const res = try oracle.aesOracle(data);
+        try std.testing.expectEqual(.ecb, res);
+    }
+
+    for (0..100) |_| {
+        const data = try blackbox.aesEcbOrCbc(allocator, .cbc);
+        defer data.deinit();
+
+        const res = try oracle.aesOracle(data);
+        try std.testing.expectEqual(.cbc, res);
+    }
 }
