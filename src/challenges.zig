@@ -130,3 +130,16 @@ test "set 2 challenge 9" {
     try data.pad(20);
     try std.testing.expectEqualStrings("YELLOW SUBMARINE\x04\x04\x04\x04", data.data);
 }
+
+test "set 2 challenge 10" {
+    const challenge_text = @embedFile("data/2/10.txt");
+    const ciphertext = try std.mem.replaceOwned(u8, allocator, challenge_text, "\n", "");
+    defer allocator.free(ciphertext);
+
+    var data = try Data.fromBase64(allocator, ciphertext);
+    defer data.deinit();
+
+    try data.decrypt(.{ .aes_128_cbc = .{ .key = "YELLOW SUBMARINE".*, .iv = "\x00".* ** 16 } });
+
+    try std.testing.expectEqualStrings(@embedFile("data/2/10-sol.txt"), data.data);
+}

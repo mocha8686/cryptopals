@@ -7,7 +7,7 @@ pub fn xor(lhs: *Data, rhs: Data) !void {
     return xorBytes(lhs, rhs.data);
 }
 
-pub fn xorBytes(data: *Data, bytes: []u8) !void {
+pub fn xorBytes(data: *Data, bytes: []const u8) !void {
     const allocator = data.allocator;
     const len = @max(data.data.len, bytes.len);
     const buf = try allocator.alloc(u8, len);

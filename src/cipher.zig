@@ -7,25 +7,29 @@ pub const Cipher = union(enum) {
     aes_128_ecb: struct {
         key: [16]u8,
     },
+    aes_128_cbc: struct {
+        key: [16]u8,
+        iv: [16]u8,
+    },
 };
 
 pub fn decrypt(data: *Data, cipher: Cipher) !void {
     const allocator = data.allocator;
     switch (cipher) {
         .aes_128_ecb => |*aes_info| {
-            const c = aes.Aes128.initDec(aes_info.key);
             if (data.data.len % 16 != 0) {
                 return error.InvalidDataLength;
             }
 
+            const c = aes.Aes128.initDec(aes_info.key);
             var res_buf = try allocator.alloc(u8, data.data.len);
 
             for (0..data.data.len / 16) |i| {
                 const a = i * 16;
                 const b = (i + 1) * 16;
 
-                var buf: [16]u8 = undefined;
                 var src: [16]u8 = undefined;
+                var buf: [16]u8 = undefined;
 
                 @memcpy(&src, data.data[a..b]);
                 c.decrypt(&buf, &src);
@@ -35,6 +39,38 @@ pub fn decrypt(data: *Data, cipher: Cipher) !void {
             allocator.free(data.data);
             data.data = res_buf;
         },
+        .aes_128_cbc => |*aes_info| {
+            if (data.data.len % 16 != 0) {
+                return error.InvalidDataLength;
+            }
+
+            const c = aes.Aes128.initDec(aes_info.key);
+            var res_buf = try allocator.alloc(u8, data.data.len);
+
+            for (0..data.data.len / 16) |i| {
+                const a = i * 16;
+                const b = (i + 1) * 16;
+
+                var src: [16]u8 = undefined;
+                var buf: [16]u8 = undefined;
+
+                @memcpy(&src, data.data[a..b]);
+                c.decrypt(&buf, &src);
+                @memcpy(res_buf[a..b], &buf);
+            }
+
+            const old_buf = data.data;
+            defer allocator.free(old_buf);
+
+            const xor_buf = try allocator.alloc(u8, data.data.len);
+            defer allocator.free(xor_buf);
+
+            @memcpy(xor_buf[0..16], aes_info.iv[0..]);
+            @memcpy(xor_buf[16..], old_buf[0 .. data.data.len - 16]);
+
+            data.data = res_buf;
+            try data.xorBytes(xor_buf);
+        },
     }
 }
 
@@ -42,19 +78,19 @@ pub fn encrypt(data: *Data, cipher: Cipher) !void {
     const allocator = data.allocator;
     switch (cipher) {
         .aes_128_ecb => |*aes_info| {
-            const c = aes.Aes128.initEnc(aes_info.key);
             if (data.data.len % 16 != 0) {
                 return error.InvalidDataLength;
             }
 
+            const c = aes.Aes128.initEnc(aes_info.key);
             var res_buf = try allocator.alloc(u8, data.data.len);
 
             for (0..data.data.len / 16) |i| {
                 const a = i * 16;
                 const b = (i + 1) * 16;
 
-                var buf: [16]u8 = undefined;
                 var src: [16]u8 = undefined;
+                var buf: [16]u8 = undefined;
 
                 @memcpy(&src, data.data[a..b]);
                 c.encrypt(&buf, &src);

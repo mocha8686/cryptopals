@@ -76,7 +76,7 @@ pub fn xor(self: *Self, other: Self) !void {
     return xorLib.xor(self, other);
 }
 
-pub fn xorBytes(self: *Self, other: []u8) !void {
+pub fn xorBytes(self: *Self, other: []const u8) !void {
     return xorLib.xorBytes(self, other);
 }
 
