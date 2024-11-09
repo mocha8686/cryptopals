@@ -4,17 +4,21 @@ const Data = @import("Data.zig");
 const Allocator = std.mem.Allocator;
 
 pub fn xor(lhs: *Data, rhs: Data) !void {
-    const allocator = lhs.allocator;
-    const len = @max(lhs.data.len, rhs.data.len);
+    return xorBytes(lhs, rhs.data);
+}
+
+pub fn xorBytes(data: *Data, bytes: []u8) !void {
+    const allocator = data.allocator;
+    const len = @max(data.data.len, bytes.len);
     const buf = try allocator.alloc(u8, len);
     for (0..len) |i| {
-        const l = lhs.data[i % lhs.data.len];
-        const r = rhs.data[i % rhs.data.len];
+        const l = data.data[i % data.data.len];
+        const r = bytes[i % bytes.len];
         buf[i] = l ^ r;
     }
 
-    allocator.free(lhs.data);
-    lhs.data = buf;
+    allocator.free(data.data);
+    data.data = buf;
 }
 
 pub fn guessSingleByteXor(allocator: Allocator, ciphertext: Data) !Data {
@@ -25,7 +29,7 @@ pub fn guessSingleByteXor(allocator: Allocator, ciphertext: Data) !Data {
         var buf = try allocator.alloc(u8, 1);
         buf[0] = @intCast(b);
         var data = Data.init(allocator, buf);
-        _ = try data.xor(ciphertext);
+        try data.xor(ciphertext);
 
         const score = data.score();
 

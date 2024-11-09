@@ -56,9 +56,8 @@ test "set 1 challenge 5" {
 
     var plaintext_data = try Data.new(allocator, plaintext);
     defer plaintext_data.deinit();
-    const key_data = Data.init(allocator, key);
 
-    try plaintext_data.xor(key_data);
+    try plaintext_data.xorBytes(key);
 
     const hex_str = try plaintext_data.hex();
     defer hex_str.deinit();

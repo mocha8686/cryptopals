@@ -76,6 +76,10 @@ pub fn xor(self: *Self, other: Self) !void {
     return xorLib.xor(self, other);
 }
 
+pub fn xorBytes(self: *Self, other: []u8) !void {
+    return xorLib.xorBytes(self, other);
+}
+
 pub fn score(self: Self) isize {
     return scoreLib.score(self);
 }

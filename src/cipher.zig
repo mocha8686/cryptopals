@@ -64,6 +64,37 @@ pub fn encrypt(data: *Data, cipher: Cipher) !void {
             allocator.free(data.data);
             data.data = res_buf;
         },
+        .aes_128_cbc => |*aes_info| {
+            if (data.data.len % 16 != 0) {
+                return error.InvalidDataLength;
+            }
+
+            const c = aes.Aes128.initEnc(aes_info.key);
+            const res_buf = try allocator.alloc(u8, data.data.len);
+            var prev_block = try Data.new(allocator, aes_info.iv[0..]);
+
+            for (0..data.data.len / 16) |i| {
+                const a = i * 16;
+                const b = (i + 1) * 16;
+
+                try prev_block.xorBytes(data.data[a..b]);
+
+                var src: [16]u8 = undefined;
+                var buf: [16]u8 = undefined;
+
+                @memcpy(&src, prev_block.data);
+                c.encrypt(&buf, &src);
+                @memcpy(res_buf[a..b], &buf);
+
+                prev_block.deinit();
+                prev_block = try Data.new(allocator, &buf);
+            }
+
+            prev_block.deinit();
+
+            allocator.free(data.data);
+            data.data = res_buf;
+        },
     }
 }
 

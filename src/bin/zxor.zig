@@ -49,7 +49,7 @@ pub fn main() !void {
         return;
     }
 
-    const key_str = res.args.key.?;
+    const key = res.args.key.?;
 
     var file: std.fs.File = undefined;
     if (res.args.input) |path| {
@@ -62,9 +62,7 @@ pub fn main() !void {
     const buf = try file.readToEndAlloc(allocator, 1024 * 10);
 
     var data = Data.init(allocator, buf);
-    const key = try Data.new(allocator, key_str);
-
-    try data.xor(key);
+    try data.xorBytes(key);
 
     const stdout = std.io.getStdOut();
     try stdout.writeAll(data.data);
