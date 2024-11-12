@@ -32,7 +32,7 @@ const frequencies = std.StaticStringMap(isize).initComptime(.{
 
 pub fn score(data: Data) isize {
     var total_score: isize = 0;
-    for (data.data) |b| {
+    for (data.buf) |b| {
         if (std.ascii.isAlphanumeric(b)) {
             var str: [1]u8 = undefined;
             const c = std.ascii.toLower(b);

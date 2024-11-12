@@ -65,5 +65,5 @@ pub fn main() !void {
     try data.xorBytes(key);
 
     const stdout = std.io.getStdOut();
-    try stdout.writeAll(data.data);
+    try stdout.writeAll(data.buf);
 }
