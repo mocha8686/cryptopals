@@ -1,7 +1,7 @@
 const std = @import("std");
 const Data = @import("Data.zig");
 
-const aes = @import("cipher/aes.zig");
+pub const aes = @import("cipher/aes.zig");
 
 pub const Cipher = union(enum) {
     aes_128_ecb: struct {
