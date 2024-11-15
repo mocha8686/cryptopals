@@ -2,10 +2,12 @@ const std = @import("std");
 const cryptopals = @import("cryptopals");
 
 const Allocator = std.mem.Allocator;
+const DefaultPrng = std.rand.DefaultPrng;
 
+const Blackbox = cryptopals.Blackbox;
 const Data = cryptopals.Data;
-const cipherLib = cryptopals.cipher;
 const EcbOrCbc = cryptopals.oracle.EcbOrCbc;
+const cipherLib = cryptopals.cipher;
 
 pub fn aesEcbOrCbc(allocator: Allocator, maybe_cipher_type: ?EcbOrCbc) !Data {
     var seed: u64 = undefined;
@@ -84,5 +86,9 @@ pub const AesPrefix = struct {
 
         try data.pad(16);
         try data.encrypt(.{ .aes_128_ecb = .{ .key = self.key } });
+    }
+
+    pub fn blackbox(self: *Self) Blackbox {
+        return Blackbox.init(self);
     }
 };

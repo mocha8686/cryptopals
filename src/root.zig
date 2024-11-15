@@ -1,3 +1,4 @@
+pub const Blackbox = @import("Blackbox.zig");
 pub const Data = @import("Data.zig");
 pub const cipher = @import("cipher.zig");
 pub const oracle = @import("oracle.zig");
