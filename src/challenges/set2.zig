@@ -5,7 +5,7 @@ const blackbox = @import("set2/blackbox.zig");
 
 const allocator = std.testing.allocator;
 
-const aesEcbOrCbc = blackbox.aesEcbOrCbc;
+const AesEcbOrCbc = blackbox.AesEcbOrCbc;
 const AesPrefix = blackbox.AesPrefix;
 
 const Data = cryptopals.Data;
@@ -33,17 +33,23 @@ test "challenge 10" {
 }
 
 test "challenge 11" {
+    const plaintext = @embedFile("data/funky.txt");
+
+    var ecb = try AesEcbOrCbc.init(.ecb);
     for (0..10) |_| {
-        const data = try aesEcbOrCbc(allocator, .ecb);
+        var data = try Data.new(allocator, plaintext);
         defer data.deinit();
+        try ecb.encrypt(&data);
 
         const res = try oracle.aesOracle(data);
         try std.testing.expectEqual(.ecb, res);
     }
 
+    var cbc = try AesEcbOrCbc.init(.cbc);
     for (0..10) |_| {
-        const data = try aesEcbOrCbc(allocator, .cbc);
+        var data = try Data.new(allocator, plaintext);
         defer data.deinit();
+        try cbc.encrypt(&data);
 
         const res = try oracle.aesOracle(data);
         try std.testing.expectEqual(.cbc, res);
@@ -53,17 +59,23 @@ test "challenge 11" {
 test "[S1] challenge 11 x100" {
     if (config.slow < 1) return;
 
+    const plaintext = @embedFile("data/funky.txt");
+
+    var ecb = try AesEcbOrCbc.init(.ecb);
     for (0..100) |_| {
-        const data = try aesEcbOrCbc(allocator, .ecb);
+        var data = try Data.new(allocator, plaintext);
         defer data.deinit();
+        try ecb.encrypt(&data);
 
         const res = try oracle.aesOracle(data);
         try std.testing.expectEqual(.ecb, res);
     }
 
+    var cbc = try AesEcbOrCbc.init(.cbc);
     for (0..100) |_| {
-        const data = try aesEcbOrCbc(allocator, .cbc);
+        var data = try Data.new(allocator, plaintext);
         defer data.deinit();
+        try cbc.encrypt(&data);
 
         const res = try oracle.aesOracle(data);
         try std.testing.expectEqual(.cbc, res);

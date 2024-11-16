@@ -6,47 +6,67 @@ const DefaultPrng = std.rand.DefaultPrng;
 
 const Blackbox = cryptopals.Blackbox;
 const Data = cryptopals.Data;
+const DefaultPrng = std.rand.DefaultPrng;
 const EcbOrCbc = cryptopals.oracle.EcbOrCbc;
 const cipherLib = cryptopals.cipher;
 
-pub fn aesEcbOrCbc(allocator: Allocator, maybe_cipher_type: ?EcbOrCbc) !Data {
-    var seed: u64 = undefined;
-    try std.posix.getrandom(std.mem.asBytes(&seed));
-    var prng = std.rand.DefaultPrng.init(seed);
-    const rand = prng.random();
+pub const AesEcbOrCbc = struct {
+    cipher_type: cipherLib.Cipher,
+    prng: DefaultPrng,
 
-    var key: [16]u8 = undefined;
-    var iv: [16]u8 = undefined;
+    const Self = @This();
 
-    rand.bytes(&key);
-    rand.bytes(&iv);
+    pub fn init(maybe_cipher_type: ?EcbOrCbc) !Self {
+        var seed: u64 = undefined;
+        try std.posix.getrandom(std.mem.asBytes(&seed));
+        var prng = DefaultPrng.init(seed);
+        const rand = prng.random();
 
-    const cipher_type: cipherLib.Cipher = if (maybe_cipher_type) |c|
-        switch (c) {
-            .ecb => .{ .aes_128_ecb = .{ .key = key } },
-            .cbc => .{ .aes_128_cbc = .{ .key = key, .iv = iv } },
-        }
-    else if (rand.boolean())
-        .{ .aes_128_ecb = .{ .key = key } }
-    else
-        .{ .aes_128_cbc = .{ .key = key, .iv = iv } };
+        var key: [16]u8 = undefined;
+        var iv: [16]u8 = undefined;
 
-    const n_bytes_before = rand.intRangeAtMost(usize, 5, 10);
-    const n_bytes_after = rand.intRangeAtMost(usize, 5, 10);
-    const plaintext = @embedFile("../data/funky.txt");
+        rand.bytes(&key);
+        rand.bytes(&iv);
 
-    var buf = try allocator.alloc(u8, n_bytes_before + plaintext.len + n_bytes_after);
+        const cipher_type: cipherLib.Cipher = if (maybe_cipher_type) |c|
+            switch (c) {
+                .ecb => .{ .aes_128_ecb = .{ .key = key } },
+                .cbc => .{ .aes_128_cbc = .{ .key = key, .iv = iv } },
+            }
+        else if (rand.boolean())
+            .{ .aes_128_ecb = .{ .key = key } }
+        else
+            .{ .aes_128_cbc = .{ .key = key, .iv = iv } };
 
-    rand.bytes(buf[0..n_bytes_before]);
-    rand.bytes(buf[n_bytes_before + plaintext.len ..]);
-    @memcpy(buf[n_bytes_before .. n_bytes_before + plaintext.len], plaintext);
+        return .{
+            .cipher_type = cipher_type,
+            .prng = prng,
+        };
+    }
 
-    var data = Data.init(allocator, buf);
-    errdefer data.deinit();
-    try data.pad(16);
-    try data.encrypt(cipher_type);
-    return data;
-}
+    pub fn encrypt(self: *Self, data: *Data) !void {
+        const rand = self.prng.random();
+        const allocator = data.allocator;
+
+        const n_bytes_before = rand.intRangeAtMost(usize, 5, 10);
+        const n_bytes_after = rand.intRangeAtMost(usize, 5, 10);
+
+        var buf = try allocator.alloc(u8, n_bytes_before + data.buf.len + n_bytes_after);
+
+        rand.bytes(buf[0..n_bytes_before]);
+        rand.bytes(buf[n_bytes_before + data.buf.len ..]);
+        @memcpy(buf[n_bytes_before .. n_bytes_before + data.buf.len], data.buf);
+
+        data.deinit();
+        data.buf = buf;
+        try data.pad(16);
+        try data.encrypt(self.cipher_type);
+    }
+
+    pub fn blackbox(self: *Self) Blackbox {
+        return Blackbox.init(self);
+    }
+};
 
 pub const AesPrefix = struct {
     key: [16]u8,
