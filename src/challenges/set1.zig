@@ -50,8 +50,8 @@ test "challenge 3" {
     try std.testing.expectEqualStrings("Cooking MC's like a pound of bacon", res.buf);
 }
 
-test "[slow] challenge 4" {
-    if (!config.slow) return;
+test "[S3] challenge 4" {
+    if (config.slow < 3) return;
 
     const challenge_text = @embedFile("data/1/4.txt");
     const trimmed = std.mem.trim(u8, challenge_text, " \n\r\t");
@@ -102,8 +102,8 @@ test "challenge 5" {
     );
 }
 
-test "[slow] challenge 6" {
-    if (!config.slow) return;
+test "[S1] challenge 6" {
+    if (config.slow < 1) return;
 
     const text = @embedFile("data/1/6.txt");
     const ciphertext = try std.mem.replaceOwned(u8, allocator, text, "\n", "");
