@@ -23,7 +23,7 @@ pub fn init(ptr: anytype) Self {
         }
     };
 
-    return Self{
+    return .{
         .ptr = ptr,
         .encryptPtr = gen.encrypt,
     };

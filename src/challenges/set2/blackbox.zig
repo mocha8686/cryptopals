@@ -64,7 +64,7 @@ pub const AesPrefix = struct {
         var key: [16]u8 = undefined;
         rand.bytes(&key);
 
-        return Self{
+        return .{
             .key = key,
         };
     }

@@ -12,7 +12,7 @@ allocator: Allocator,
 const Self = @This();
 
 pub fn init(allocator: Allocator, buf: []const u8) Self {
-    return Self{
+    return .{
         .buf = buf,
         .allocator = allocator,
     };
@@ -34,7 +34,7 @@ pub fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
     errdefer allocator.free(buf);
     _ = try std.fmt.hexToBytes(buf, hex_str);
 
-    return Self{
+    return .{
         .buf = buf,
         .allocator = allocator,
     };
@@ -46,7 +46,7 @@ pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
     const buf = try allocator.alloc(u8, len);
     errdefer allocator.free(buf);
     try decoder.decode(buf, base64_str);
-    return Self{
+    return .{
         .buf = buf,
         .allocator = allocator,
     };
