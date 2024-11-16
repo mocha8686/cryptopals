@@ -50,8 +50,8 @@ test "challenge 11" {
     }
 }
 
-test "[slow] challenge 11 x100" {
-    if (!config.slow) return;
+test "[S1] challenge 11 x100" {
+    if (config.slow < 1) return;
 
     for (0..100) |_| {
         const data = try aesEcbOrCbc(allocator, .ecb);

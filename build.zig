@@ -16,9 +16,9 @@ pub fn build(b: *std.Build) void {
 
     // Challenges
 
-    const slow = b.option(bool, "slow", "Include slow unit tests") orelse false;
+    const slow = b.option(u3, "slow", "Max slow level of test to include [0,3]") orelse 0;
     const options = b.addOptions();
-    options.addOption(bool, "slow", slow);
+    options.addOption(u3, "slow", slow);
 
     for ([_][]const u8{
         "src/challenges/set1.zig",
