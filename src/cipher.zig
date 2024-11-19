@@ -41,3 +41,17 @@ pub fn pad(data: *Data, block_size: u8) !void {
 
     data.reinit(buf);
 }
+
+pub fn unpad(data: *Data) !void {
+    const allocator = data.allocator;
+    const len = data.buf.len;
+    const last_byte = data.buf[len - 1];
+
+    if (len < last_byte or !std.mem.allEqual(u8, data.buf[len - last_byte ..], last_byte)) {
+        return error.InvalidPadding;
+    }
+
+    const buf = try allocator.alloc(u8, len - last_byte);
+    @memcpy(buf, data.buf[0 .. len - last_byte]);
+    data.reinit(buf);
+}

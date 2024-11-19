@@ -70,6 +70,7 @@ pub fn hammingDistance(self: Self, other: Self) usize {
 pub const decrypt = cipherLib.decrypt;
 pub const encrypt = cipherLib.encrypt;
 pub const pad = cipherLib.pad;
+pub const unpad = cipherLib.unpad;
 pub const xor = xorLib.xor;
 pub const xorBytes = xorLib.xorBytes;
 pub const score = scoreLib.score;
