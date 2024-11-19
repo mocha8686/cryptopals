@@ -1,12 +1,15 @@
 const std = @import("std");
-const Blackbox = @import("../Blackbox.zig");
+const blackboxLib = @import("../blackbox.zig");
 const Data = @import("../Data.zig");
+const aes = @import("aes.zig");
 
 const Allocator = std.mem.Allocator;
+const Encrypter = blackboxLib.Encrypter;
 
-pub fn aesEcbPrefix(allocator: Allocator, blackbox: Blackbox) !Data {
-    const block_size = try findBlockSize(allocator, blackbox);
-    const next_block_len, const ciphertext_len = try getCipherInfo(allocator, blackbox, block_size);
+pub fn aesEcbPrefix(allocator: Allocator, blackbox: Encrypter) !Data {
+    const block_size = try aes.ecb.findBlockSize(allocator, blackbox);
+    const next_block_len = try getNextBlockLen(allocator, blackbox);
+    const ciphertext_len = try getCiphertextLen(allocator, blackbox, block_size, next_block_len);
 
     var res = try allocator.alloc(u8, ciphertext_len);
 
@@ -43,23 +46,14 @@ pub fn aesEcbPrefix(allocator: Allocator, blackbox: Blackbox) !Data {
     return Data.init(allocator, res);
 }
 
-fn findBlockSize(allocator: Allocator, blackbox: Blackbox) !usize {
-    inline for (1..64) |i| {
-        const payload = "AA" ** i;
-        var data = try Data.new(allocator, payload);
-        defer data.deinit();
-        try blackbox.encrypt(&data);
-        if (std.mem.eql(u8, data.buf[0..i], data.buf[i .. i * 2])) return i;
-    }
-    std.debug.panic("Could not find block size between 0 and 64.", .{});
+fn getNextBlockLen(allocator: Allocator, blackbox: Encrypter) !usize {
+    var zero = try Data.new(allocator, "");
+    defer zero.deinit();
+    try blackbox.encrypt(&zero);
+    return zero.buf.len;
 }
 
-fn getCipherInfo(allocator: Allocator, blackbox: Blackbox, block_size: usize) !struct { usize, usize } {
-    var empty = try Data.new(allocator, "");
-    defer empty.deinit();
-    try blackbox.encrypt(&empty);
-    const next_block_len = empty.buf.len;
-
+fn getCiphertextLen(allocator: Allocator, blackbox: Encrypter, block_size: usize, next_block_len: usize) !usize {
     for (1..block_size + 1) |i| {
         var payload = try allocator.alloc(u8, i);
         defer allocator.free(payload);
@@ -69,10 +63,7 @@ fn getCipherInfo(allocator: Allocator, blackbox: Blackbox, block_size: usize) !s
         defer data.deinit();
         try blackbox.encrypt(&data);
         if (data.buf.len != next_block_len) {
-            return .{
-                next_block_len,
-                next_block_len - i,
-            };
+            return next_block_len - i;
         }
     }
     unreachable;

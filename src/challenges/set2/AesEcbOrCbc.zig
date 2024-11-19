@@ -3,7 +3,7 @@ const cryptopals = @import("cryptopals");
 
 const DefaultPrng = std.rand.DefaultPrng;
 
-const Blackbox = cryptopals.Blackbox;
+const Encrypter = cryptopals.blackbox.Encrypter;
 const Data = cryptopals.Data;
 const EcbOrCbc = cryptopals.oracle.EcbOrCbc;
 const cipherLib = cryptopals.cipher;
@@ -59,6 +59,6 @@ pub fn encrypt(self: *Self, data: *Data) !void {
     try data.encrypt(self.cipher_type);
 }
 
-pub fn blackbox(self: *Self) Blackbox {
-    return Blackbox.init(self);
+pub fn encrypter(self: *Self) Encrypter {
+    return Encrypter.init(self);
 }

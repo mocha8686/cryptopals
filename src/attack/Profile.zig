@@ -1,9 +1,7 @@
 const std = @import("std");
-const cryptopals = @import("cryptopals");
+const Data = @import("../Data.zig");
 
 const Allocator = std.mem.Allocator;
-
-const Data = cryptopals.Data;
 
 allocator: Allocator,
 email: []const u8,

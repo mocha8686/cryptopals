@@ -1,12 +1,14 @@
 const std = @import("std");
 const cryptopals = @import("cryptopals");
-const Profile = @import("Profile.zig");
 
 const DefaultPrng = std.rand.DefaultPrng;
 
-const Blackbox = cryptopals.Blackbox;
+const Encrypter = cryptopals.blackbox.Encrypter;
+const Decrypter = cryptopals.blackbox.Decrypter;
+const EncDec = cryptopals.blackbox.EncDec;
 const Data = cryptopals.Data;
 const EcbOrCbc = cryptopals.oracle.EcbOrCbc;
+const Profile = cryptopals.attack.Profile;
 const cipherLib = cryptopals.cipher;
 
 cipher_type: cipherLib.Cipher,
@@ -52,10 +54,18 @@ pub fn encrypt(self: *Self, data: *Data) !void {
     try data.encrypt(self.cipher_type);
 }
 
-pub fn decrypt(self: Self, data: *Data) !void {
+pub fn decrypt(self: *Self, data: *Data) !void {
     try data.decrypt(self.cipher_type);
 }
 
-pub fn blackbox(self: *Self) Blackbox {
-    return Blackbox.init(self);
+pub fn encrypter(self: *Self) Encrypter {
+    return Encrypter.init(self);
+}
+
+pub fn decrypter(self: *Self) Decrypter {
+    return Decrypter.init(self);
+}
+
+pub fn encDec(self: *Self) EncDec {
+    return EncDec.init(self);
 }
