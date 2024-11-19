@@ -30,8 +30,8 @@ pub fn encrypt(data: *Data, cipher: Cipher) !void {
 // PKCS#7 padding scheme.
 pub fn pad(data: *Data, block_size: u8) !void {
     const len = data.buf.len;
+    if (len % block_size == 0) return;
     const padding_len: u8 = @intCast(block_size - len % block_size);
-    if (padding_len == 0) return;
 
     const allocator = data.allocator;
 
