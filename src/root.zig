@@ -1,5 +1,6 @@
 pub const Blackbox = @import("Blackbox.zig");
 pub const Data = @import("Data.zig");
+pub const attack = @import("attack.zig");
 pub const cipher = @import("cipher.zig");
 pub const oracle = @import("oracle.zig");
 pub const score = @import("score.zig");
