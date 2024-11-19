@@ -17,8 +17,7 @@ pub fn xorBytes(data: *Data, bytes: []const u8) !void {
         buf[i] = l ^ r;
     }
 
-    data.deinit();
-    data.buf = buf;
+    data.reinit(buf);
 }
 
 pub fn guessSingleByteXor(data: Data) !Data {

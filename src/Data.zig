@@ -24,6 +24,11 @@ pub fn new(allocator: Allocator, buf: []const u8) !Self {
     return Self.init(allocator, new_buf);
 }
 
+pub fn reinit(self: *Self, buf: []const u8) void {
+    self.deinit();
+    self.buf = buf;
+}
+
 pub fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
     if (hex_str.len % 2 != 0) {
         return error.BadLength;

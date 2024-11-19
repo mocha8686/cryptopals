@@ -39,6 +39,5 @@ pub fn pad(data: *Data, block_size: u8) !void {
     @memcpy(buf[0..len], data.buf);
     @memset(buf[len..], padding_len);
 
-    data.deinit();
-    data.buf = buf;
+    data.reinit(buf);
 }

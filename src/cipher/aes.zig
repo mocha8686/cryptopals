@@ -25,8 +25,7 @@ pub fn aes128EcbDecrypt(data: *Data, key: [16]u8) !void {
         @memcpy(res_buf[a..b], &buf);
     }
 
-    data.deinit();
-    data.buf = res_buf;
+    data.reinit(res_buf);
 }
 
 pub fn aes128CbcDecrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
@@ -58,8 +57,7 @@ pub fn aes128CbcDecrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
     @memcpy(xor_buf[0..16], iv[0..]);
     @memcpy(xor_buf[16..], data.buf[0 .. len - 16]);
 
-    data.deinit();
-    data.buf = res_buf;
+    data.reinit(res_buf);
     try data.xorBytes(xor_buf);
 }
 
@@ -85,8 +83,7 @@ pub fn aes128EcbEncrypt(data: *Data, key: [16]u8) !void {
         @memcpy(res_buf[a..b], &buf);
     }
 
-    data.deinit();
-    data.buf = res_buf;
+    data.reinit(res_buf);
 }
 
 pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
@@ -118,9 +115,7 @@ pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
     }
 
     prev_block.deinit();
-
-    data.deinit();
-    data.buf = res_buf;
+    data.reinit(res_buf);
 }
 
 pub fn aesEcb128Score(data: Data) !usize {
