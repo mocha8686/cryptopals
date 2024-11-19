@@ -1,12 +1,11 @@
 const std = @import("std");
 const config = @import("config");
 const cryptopals = @import("cryptopals");
-const blackbox = @import("set2/blackbox.zig");
+
+const AesEcbOrCbc = @import("set2/AesEcbOrCbc.zig");
+const AesPrefix = @import("set2/AesPrefix.zig");
 
 const allocator = std.testing.allocator;
-
-const AesEcbOrCbc = blackbox.AesEcbOrCbc;
-const AesPrefix = blackbox.AesPrefix;
 
 const Data = cryptopals.Data;
 const oracle = cryptopals.oracle;
