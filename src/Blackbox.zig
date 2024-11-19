@@ -17,7 +17,7 @@ pub fn init(ptr: anytype) Self {
     if (type_info.Pointer.size != .One) @compileError("ptr must be a single item pointer");
 
     const gen = struct {
-        pub fn encrypt(self_ptr: anyopaque, data: []const u8) anyerror!void {
+        pub fn encrypt(self_ptr: *anyopaque, data: *Data) anyerror!void {
             const self: T = @ptrCast(@alignCast(self_ptr));
             return @call(.always_inline, type_info.Pointer.child.encrypt, .{ self, data });
         }

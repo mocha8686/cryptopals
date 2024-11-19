@@ -24,7 +24,7 @@ pub fn new() !Self {
     };
 }
 
-pub fn encrypt(self: Self, data: *Data) !void {
+pub fn encrypt(self: *Self, data: *Data) !void {
     const allocator = data.allocator;
 
     const hidden_plaintext = try Data.fromBase64(allocator, hidden_string);
