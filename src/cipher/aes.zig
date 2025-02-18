@@ -17,12 +17,7 @@ pub fn aes128EcbDecrypt(data: *Data, key: [16]u8) !void {
         const a = i * 16;
         const b = (i + 1) * 16;
 
-        var src: [16]u8 = undefined;
-        var buf: [16]u8 = undefined;
-
-        @memcpy(&src, data.buf[a..b]);
-        c.decrypt(&buf, &src);
-        @memcpy(res_buf[a..b], &buf);
+        c.decrypt(res_buf[a..b][0..16], data.buf[a..b][0..16]);
     }
 
     data.reinit(res_buf);
@@ -43,12 +38,7 @@ pub fn aes128CbcDecrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
         const a = i * 16;
         const b = (i + 1) * 16;
 
-        var src: [16]u8 = undefined;
-        var buf: [16]u8 = undefined;
-
-        @memcpy(&src, data.buf[a..b]);
-        c.decrypt(&buf, &src);
-        @memcpy(res_buf[a..b], &buf);
+        c.decrypt(res_buf[a..b][0..16], data.buf[a..b][0..16]);
     }
 
     const xor_buf = try allocator.alloc(u8, len);
@@ -75,12 +65,7 @@ pub fn aes128EcbEncrypt(data: *Data, key: [16]u8) !void {
         const a = i * 16;
         const b = (i + 1) * 16;
 
-        var src: [16]u8 = undefined;
-        var buf: [16]u8 = undefined;
-
-        @memcpy(&src, data.buf[a..b]);
-        c.encrypt(&buf, &src);
-        @memcpy(res_buf[a..b], &buf);
+        c.encrypt(res_buf[a..b][0..16], data.buf[a..b][0..16]);
     }
 
     data.reinit(res_buf);
@@ -103,15 +88,10 @@ pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
 
         try prev_block.xorBytes(data.buf[a..b]);
 
-        var src: [16]u8 = undefined;
-        var buf: [16]u8 = undefined;
-
-        @memcpy(&src, prev_block.buf);
-        c.encrypt(&buf, &src);
-        @memcpy(res_buf[a..b], &buf);
+        c.encrypt(res_buf[a..b][0..16], prev_block.buf[0..16]);
 
         prev_block.deinit();
-        prev_block = try Data.new(allocator, &buf);
+        prev_block = try Data.new(allocator, res_buf[a..b]);
     }
 
     prev_block.deinit();
