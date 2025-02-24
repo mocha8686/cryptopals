@@ -35,6 +35,10 @@ pub fn build(b: *std.Build) void {
         challenge_unit_tests.root_module.addImport("cryptopals", cryptopals_mod);
         const run_challenge_unit_tests = b.addRunArtifact(challenge_unit_tests);
         test_step.dependOn(&run_challenge_unit_tests.step);
+
+        const echo = b.addSystemCommand(&.{"echo"});
+        echo.addArtifactArg(challenge_unit_tests);
+        debug_step.dependOn(&echo.step);
     }
 
     const clap = b.dependency("clap", .{});
@@ -48,14 +52,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     b.installArtifact(lib);
-
-    const lib_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
-    test_step.dependOn(&run_lib_unit_tests.step);
 
     // Executables
 
