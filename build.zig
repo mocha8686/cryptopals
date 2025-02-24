@@ -4,6 +4,10 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const test_step = b.step("test", "Run unit tests.");
+    const run_step = b.step("run", "Run the applicaiton.");
+    const debug_step = b.step("debug", "Print the paths to the challenge test executables.");
+
     // Root module
 
     const cryptopals_mod = b.createModule(.{
@@ -11,8 +15,6 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-
-    const test_step = b.step("test", "Run unit tests.");
 
     // Challenges
 
@@ -74,6 +76,5 @@ pub fn build(b: *std.Build) void {
         run_zxor.addArgs(args);
     }
 
-    const run_step = b.step("run", "Run the applicaiton.");
     run_step.dependOn(&run_zxor.step);
 }
