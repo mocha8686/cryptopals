@@ -6,19 +6,20 @@ const aes = @import("aes.zig");
 const Allocator = std.mem.Allocator;
 const Encrypter = blackboxLib.Encrypter;
 
-pub fn aesEcbPrefix(allocator: Allocator, blackbox: Encrypter) !Data {
+pub fn aesEcbInfix(allocator: Allocator, blackbox: Encrypter) !Data {
     const block_size = try aes.ecb.findBlockSize(allocator, blackbox);
-    const next_block_len = try getNextBlockLen(allocator, blackbox);
-    const ciphertext_len = try getCiphertextLen(allocator, blackbox, block_size, next_block_len);
+    const prefix_len = try aes.ecb.getPrefixLen(allocator, blackbox, block_size);
+    const ciphertext_len = try aes.ecb.getCiphertextLen(allocator, blackbox, block_size, prefix_len);
+    const buf_len = aes.ecb.alignToNextBlock(prefix_len + ciphertext_len, block_size);
 
     var res = try allocator.alloc(u8, ciphertext_len);
 
-    var buf = try allocator.alloc(u8, next_block_len);
+    var buf = try allocator.alloc(u8, buf_len);
     defer allocator.free(buf);
     @memset(buf, 'A');
 
-    const b = ciphertext_len;
-    const a = b - block_size;
+    const a = buf_len;
+    const b = a + block_size;
 
     outer: for (0..ciphertext_len) |i| {
         var target = try Data.new(allocator, buf[0 .. buf.len - i - 1]);
@@ -41,31 +42,9 @@ pub fn aesEcbPrefix(allocator: Allocator, blackbox: Encrypter) !Data {
                 continue :outer;
             }
         }
+
         unreachable;
     }
 
     return Data.init(allocator, res);
-}
-
-fn getNextBlockLen(allocator: Allocator, blackbox: Encrypter) !usize {
-    var zero = try Data.new(allocator, "");
-    defer zero.deinit();
-    try blackbox.encrypt(&zero);
-    return zero.buf.len;
-}
-
-fn getCiphertextLen(allocator: Allocator, blackbox: Encrypter, block_size: usize, next_block_len: usize) !usize {
-    for (1..block_size + 1) |i| {
-        var payload = try allocator.alloc(u8, i);
-        defer allocator.free(payload);
-        @memset(payload[0..], 'A');
-
-        var data = try Data.new(allocator, payload);
-        defer data.deinit();
-        try blackbox.encrypt(&data);
-        if (data.buf.len != next_block_len) {
-            return next_block_len - i;
-        }
-    }
-    unreachable;
 }

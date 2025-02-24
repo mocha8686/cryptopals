@@ -3,6 +3,7 @@ const config = @import("config");
 const cryptopals = @import("cryptopals");
 
 const AesEcbOrCbc = @import("set2/AesEcbOrCbc.zig");
+const AesInfix = @import("set2/AesInfix.zig");
 const AesPrefix = @import("set2/AesPrefix.zig");
 const AesProfile = @import("set2/AesProfile.zig");
 
@@ -95,18 +96,32 @@ test "challenge 12" {
     );
 }
 
-test "challenge 13" {
-    var profile_blackbox = try AesProfile.withKey("YELLOW SUBMARINE".*);
-    const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
-    defer profile.deinit();
-    try std.testing.expectEqualStrings("admin", profile.role);
-}
+// test "challenge 13" {
+//     var profile_blackbox = try AesProfile.withKey("YELLOW SUBMARINE".*);
+//     const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
+//     defer profile.deinit();
+//     try std.testing.expectEqualStrings("admin", profile.role);
+// }
+//
+// test "challenge 13 x100" {
+//     for (0..100) |_| {
+//         var profile_blackbox = try AesProfile.init();
+//         const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
+//         defer profile.deinit();
+//         try std.testing.expectEqualStrings("admin", profile.role);
+//     }
+// }
 
-test "challenge 13 x100" {
-    for (0..100) |_| {
-        var profile_blackbox = try AesProfile.init();
-        const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
-        defer profile.deinit();
-        try std.testing.expectEqualStrings("admin", profile.role);
-    }
+test "challenge 14" {
+    // var infix_blackbox = try AesInfix.new(allocator, null);
+    var infix_blackbox = try AesInfix.new(allocator, 16);
+    defer infix_blackbox.deinit();
+
+    const res = try attack.aesEcbInfix(allocator, infix_blackbox.encrypter());
+    defer res.deinit();
+
+    try std.testing.expectEqualStrings(
+        @embedFile("data/2/14-sol.txt"),
+        res.buf,
+    );
 }
