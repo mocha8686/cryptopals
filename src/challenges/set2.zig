@@ -85,9 +85,12 @@ test "[S1] challenge 11 x100" {
     }
 }
 
-test "challenge 12" {
+test "[S1] challenge 12" {
+    if (config.slow < 1) return;
+
     var prefix_blackbox = try AesPrefix.new();
-    const res = try attack.aesEcbPrefix(allocator, prefix_blackbox.encrypter());
+
+    const res = try attack.aesEcbDecipherPostfix(allocator, prefix_blackbox.encrypter());
     defer res.deinit();
 
     try std.testing.expectEqualStrings(
@@ -112,16 +115,46 @@ test "challenge 12" {
 //     }
 // }
 
-test "challenge 14" {
-    // var infix_blackbox = try AesInfix.new(allocator, null);
-    var infix_blackbox = try AesInfix.new(allocator, 16);
+fn testAesEcbDecipherPostfix(prefix_len: ?u8) !void {
+    var infix_blackbox = try AesInfix.new(allocator, prefix_len);
     defer infix_blackbox.deinit();
 
-    const res = try attack.aesEcbInfix(allocator, infix_blackbox.encrypter());
+    const res = try attack.aesEcbDecipherPostfix(allocator, infix_blackbox.encrypter());
     defer res.deinit();
 
     try std.testing.expectEqualStrings(
         @embedFile("data/2/14-sol.txt"),
         res.buf,
     );
+}
+
+test "[S2] challenge 14 block-aligned prefix len" {
+    if (config.slow < 2) return;
+
+    try testAesEcbDecipherPostfix(16);
+    try testAesEcbDecipherPostfix(32);
+}
+
+test "[S2] challenge 14 misaligned prefix len" {
+    if (config.slow < 2) return;
+
+    try testAesEcbDecipherPostfix(12);
+    try testAesEcbDecipherPostfix(24);
+}
+
+test "[S3] challenge 14 random prefix len x10" {
+    if (config.slow < 3) return;
+
+    for (0..10) |_| {
+        var infix_blackbox = try AesInfix.new(allocator, null);
+        defer infix_blackbox.deinit();
+
+        const res = try attack.aesEcbDecipherPostfix(allocator, infix_blackbox.encrypter());
+        defer res.deinit();
+
+        try std.testing.expectEqualStrings(
+            @embedFile("data/2/14-sol.txt"),
+            res.buf,
+        );
+    }
 }

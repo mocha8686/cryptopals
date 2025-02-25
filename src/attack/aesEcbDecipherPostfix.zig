@@ -6,11 +6,11 @@ const aes = @import("aes.zig");
 const Allocator = std.mem.Allocator;
 const Encrypter = blackboxLib.Encrypter;
 
-pub fn aesEcbInfix(allocator: Allocator, blackbox: Encrypter) !Data {
+pub fn aesEcbDecipherPostfix(allocator: Allocator, blackbox: Encrypter) !Data {
     const block_size = try aes.ecb.findBlockSize(allocator, blackbox);
     const prefix_len = try aes.ecb.getPrefixLen(allocator, blackbox, block_size);
     const ciphertext_len = try aes.ecb.getCiphertextLen(allocator, blackbox, block_size, prefix_len);
-    const buf_len = aes.ecb.alignToNextBlock(prefix_len + ciphertext_len, block_size);
+    const buf_len = aes.ecb.paddingToNextBlock(prefix_len, block_size) + aes.ecb.alignToNextBlock(ciphertext_len, block_size);
 
     var res = try allocator.alloc(u8, ciphertext_len);
 
@@ -18,8 +18,8 @@ pub fn aesEcbInfix(allocator: Allocator, blackbox: Encrypter) !Data {
     defer allocator.free(buf);
     @memset(buf, 'A');
 
-    const a = buf_len;
-    const b = a + block_size;
+    const b = aes.ecb.alignToNextBlock(prefix_len, block_size) + aes.ecb.alignToNextBlock(ciphertext_len, block_size);
+    const a = b - block_size;
 
     outer: for (0..ciphertext_len) |i| {
         var target = try Data.new(allocator, buf[0 .. buf.len - i - 1]);
