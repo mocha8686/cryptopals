@@ -52,6 +52,7 @@ pub fn encrypt(self: *Self, data: *Data) !void {
 
 pub fn decrypt(self: *Self, data: *Data) !void {
     try data.decrypt(.{ .aes_128_cbc = .{ .key = self.key, .iv = self.iv } });
+    try data.unpad();
 }
 
 pub fn encrypter(self: *Self) Encrypter {
