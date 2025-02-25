@@ -22,7 +22,7 @@ pub fn aesEcbDecipherPostfix(allocator: Allocator, blackbox: Encrypter) !Data {
     const a = b - block_size;
 
     outer: for (0..ciphertext_len) |i| {
-        var target = try Data.new(allocator, buf[0 .. buf.len - i - 1]);
+        var target = try Data.copy(allocator, buf[0 .. buf.len - i - 1]);
         defer target.deinit();
         try blackbox.encrypt(&target);
         const target_window = target.buf[a..b];
@@ -32,7 +32,7 @@ pub fn aesEcbDecipherPostfix(allocator: Allocator, blackbox: Encrypter) !Data {
             const c: u8 = @intCast(n);
 
             buf[buf.len - 1] = c;
-            var guess = try Data.new(allocator, buf);
+            var guess = try Data.copy(allocator, buf);
             defer guess.deinit();
             try blackbox.encrypt(&guess);
 

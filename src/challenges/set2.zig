@@ -15,7 +15,7 @@ const attack = cryptopals.attack;
 const oracle = cryptopals.oracle;
 
 test "challenge 9" {
-    var data = try Data.new(allocator, "YELLOW SUBMARINE");
+    var data = try Data.copy(allocator, "YELLOW SUBMARINE");
     defer data.deinit();
 
     try data.pad(20);
@@ -40,7 +40,7 @@ test "challenge 11" {
 
     var ecb = try AesEcbOrCbc.init(.ecb);
     for (0..10) |_| {
-        var data = try Data.new(allocator, plaintext);
+        var data = try Data.copy(allocator, plaintext);
         defer data.deinit();
         try ecb.encrypt(&data);
 
@@ -50,7 +50,7 @@ test "challenge 11" {
 
     var cbc = try AesEcbOrCbc.init(.cbc);
     for (0..10) |_| {
-        var data = try Data.new(allocator, plaintext);
+        var data = try Data.copy(allocator, plaintext);
         defer data.deinit();
         try cbc.encrypt(&data);
 
@@ -66,7 +66,7 @@ test "[S1] challenge 11 x100" {
 
     var ecb = try AesEcbOrCbc.init(.ecb);
     for (0..100) |_| {
-        var data = try Data.new(allocator, plaintext);
+        var data = try Data.copy(allocator, plaintext);
         defer data.deinit();
         try ecb.encrypt(&data);
 
@@ -76,7 +76,7 @@ test "[S1] challenge 11 x100" {
 
     var cbc = try AesEcbOrCbc.init(.cbc);
     for (0..100) |_| {
-        var data = try Data.new(allocator, plaintext);
+        var data = try Data.copy(allocator, plaintext);
         defer data.deinit();
         try cbc.encrypt(&data);
 

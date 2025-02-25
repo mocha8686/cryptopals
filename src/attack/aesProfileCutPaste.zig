@@ -53,5 +53,5 @@ fn getAdminCiphertext(allocator: Allocator, blackbox: Encrypter, bytes_until_nex
     try blackbox.encrypt(&data);
 
     const admin_ciphertext = data.buf[email_index .. email_index + block_size];
-    return Data.new(allocator, admin_ciphertext);
+    return Data.copy(allocator, admin_ciphertext);
 }

@@ -20,7 +20,7 @@ pub fn init(allocator: Allocator, buf: []const u8) Self {
     };
 }
 
-pub fn new(allocator: Allocator, buf: []const u8) !Self {
+pub fn copy(allocator: Allocator, buf: []const u8) !Self {
     const new_buf = try allocator.alloc(u8, buf.len);
     @memcpy(new_buf, buf);
     return Self.init(allocator, new_buf);
@@ -116,10 +116,10 @@ pub fn deinit(self: Self) void {
 test "hamming distance" {
     const allocator = std.testing.allocator;
 
-    const lhs = try Self.new(allocator, "this is a test");
+    const lhs = try Self.copy(allocator, "this is a test");
     defer lhs.deinit();
 
-    const rhs = try Self.new(allocator, "wokka wokka!!!");
+    const rhs = try Self.copy(allocator, "wokka wokka!!!");
     defer rhs.deinit();
 
     try std.testing.expectEqual(37, lhs.hammingDistance(rhs));

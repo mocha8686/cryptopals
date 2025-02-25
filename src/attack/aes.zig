@@ -11,7 +11,7 @@ pub const ecb = struct {
         const upper = 32;
 
         const payload = "AA" ** (upper * 2);
-        var data = try Data.new(allocator, payload);
+        var data = try Data.copy(allocator, payload);
         defer data.deinit();
         try blackbox.encrypt(&data);
 

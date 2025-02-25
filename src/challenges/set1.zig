@@ -88,7 +88,7 @@ test "challenge 5" {
     const plaintext = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
     const key = "ICE";
 
-    var plaintext_data = try Data.new(allocator, plaintext);
+    var plaintext_data = try Data.copy(allocator, plaintext);
     defer plaintext_data.deinit();
 
     try plaintext_data.xorBytes(key);

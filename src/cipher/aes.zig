@@ -80,7 +80,7 @@ pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
     const allocator = data.allocator;
     const c = aes.Aes128.initEnc(key);
     const res_buf = try allocator.alloc(u8, len);
-    var prev_block = try Data.new(allocator, iv[0..]);
+    var prev_block = try Data.copy(allocator, iv[0..]);
 
     for (0..len / 16) |i| {
         const a = i * 16;
@@ -91,7 +91,7 @@ pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
         c.encrypt(res_buf[a..b][0..16], prev_block.buf[0..16]);
 
         prev_block.deinit();
-        prev_block = try Data.new(allocator, res_buf[a..b]);
+        prev_block = try Data.copy(allocator, res_buf[a..b]);
     }
 
     prev_block.deinit();
