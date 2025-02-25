@@ -9,10 +9,10 @@ pub fn xor(lhs: *Data, rhs: Data) !void {
 
 pub fn xorBytes(data: *Data, bytes: []const u8) !void {
     const allocator = data.allocator;
-    const len = @max(data.buf.len, bytes.len);
+    const len = @max(data.len, bytes.len);
     const buf = try allocator.alloc(u8, len);
     for (0..len) |i| {
-        const l = data.buf[i % data.buf.len];
+        const l = data.buf[i % data.len];
         const r = bytes[i % bytes.len];
         buf[i] = l ^ r;
     }
@@ -22,7 +22,7 @@ pub fn xorBytes(data: *Data, bytes: []const u8) !void {
 
 pub fn guessSingleByteXor(data: Data) !Data {
     const allocator = data.allocator;
-    var max_score: isize = 0;
+    var max_score: i32 = 0;
     var best_guess: ?Data = null;
 
     for (0..std.math.maxInt(u8)) |b| {
@@ -49,17 +49,17 @@ pub fn guessSingleByteXor(data: Data) !Data {
 
 pub fn breakRepeatingKeyXor(data: Data) !Data {
     const allocator = data.allocator;
-    const len = data.buf.len;
+    const len = data.len;
     const keysize = try guessKeysize(data);
 
     var num_plus_ones = len % keysize;
-    var n: usize = 0;
+    var n: u32 = 0;
     var blocks = try allocator.alloc(Data, keysize);
 
     defer allocator.free(blocks);
 
     for (0..keysize) |i| {
-        const num_bytes: usize = if (num_plus_ones > 0) blk: {
+        const num_bytes: u32 = if (num_plus_ones > 0) blk: {
             num_plus_ones -= 1;
             break :blk len / keysize + 1;
         } else len / keysize;
@@ -91,21 +91,22 @@ pub fn breakRepeatingKeyXor(data: Data) !Data {
     return Data.init(allocator, plaintext);
 }
 
-fn guessKeysize(data: Data) !usize {
+fn guessKeysize(data: Data) !u32 {
     const allocator = data.allocator;
-    const len = data.buf.len;
+    const len = data.len;
 
     if (len < 4) {
         return error.CiphertextTooSmall;
     }
 
-    var keysize: usize = undefined;
-    var max_hamming_distance: usize = std.math.maxInt(usize);
+    var keysize: u32 = undefined;
+    var max_hamming_distance: u32 = std.math.maxInt(u32);
 
-    for (2..40) |keysize_guess| {
+    for (2..40) |k| {
+        const keysize_guess: u32 = @intCast(k);
         if (len < keysize_guess * 2) break;
-        var hamming_distance: usize = 0;
-        var n: usize = 0;
+        var hamming_distance: u32 = 0;
+        var n: u32 = 0;
         for (0..len / keysize_guess - 1) |i| {
             const offset = keysize_guess * i;
             const stride = keysize_guess;

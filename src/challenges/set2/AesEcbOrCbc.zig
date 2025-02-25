@@ -45,14 +45,14 @@ pub fn encrypt(self: *Self, data: *Data) !void {
     const rand = self.prng.random();
     const allocator = data.allocator;
 
-    const n_bytes_before = rand.intRangeAtMost(usize, 5, 10);
-    const n_bytes_after = rand.intRangeAtMost(usize, 5, 10);
+    const n_bytes_before = rand.intRangeAtMost(u32, 5, 10);
+    const n_bytes_after = rand.intRangeAtMost(u32, 5, 10);
 
-    var buf = try allocator.alloc(u8, n_bytes_before + data.buf.len + n_bytes_after);
+    var buf = try allocator.alloc(u8, n_bytes_before + data.len + n_bytes_after);
 
     rand.bytes(buf[0..n_bytes_before]);
-    rand.bytes(buf[n_bytes_before + data.buf.len ..]);
-    @memcpy(buf[n_bytes_before .. n_bytes_before + data.buf.len], data.buf);
+    rand.bytes(buf[n_bytes_before + data.len ..]);
+    @memcpy(buf[n_bytes_before .. n_bytes_before + data.len], data.buf);
 
     data.reinit(buf);
     try data.pad(16);

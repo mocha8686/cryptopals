@@ -57,7 +57,7 @@ test "[S3] challenge 4" {
     const trimmed = std.mem.trim(u8, challenge_text, " \n\r\t");
     var iter = std.mem.splitSequence(u8, trimmed, "\n");
 
-    var max_score: isize = 0;
+    var max_score: i32 = 0;
     var best_guess: ?Data = null;
     while (iter.next()) |hex_str| {
         const data = try Data.fromHex(allocator, hex_str);
@@ -139,7 +139,7 @@ test "challenge 8" {
     const trimmed = std.mem.trim(u8, challenge_text, " \n\r\t");
     var iter = std.mem.splitSequence(u8, trimmed, "\n");
 
-    var max_score: usize = 0;
+    var max_score: u32 = 0;
     var best_guess: ?Data = null;
 
     while (iter.next()) |hex_str| {

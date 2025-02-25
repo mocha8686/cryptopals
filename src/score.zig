@@ -1,7 +1,7 @@
 const std = @import("std");
 const Data = @import("Data.zig");
 
-const frequencies = std.StaticStringMap(isize).initComptime(.{
+const frequencies = std.StaticStringMap(i32).initComptime(.{
     .{ "e", 12700 },
     .{ "t", 9100 },
     .{ "a", 8200 },
@@ -30,8 +30,8 @@ const frequencies = std.StaticStringMap(isize).initComptime(.{
     .{ "z", 7400 },
 });
 
-pub fn score(data: Data) isize {
-    var total_score: isize = 0;
+pub fn score(data: Data) i32 {
+    var total_score: i32 = 0;
     for (data.buf) |b| {
         if (std.ascii.isAlphanumeric(b)) {
             var str: [1]u8 = undefined;

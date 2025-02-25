@@ -7,6 +7,7 @@ const Allocator = std.mem.Allocator;
 const Cipher = cipherLib.Cipher;
 
 buf: []const u8,
+len: u32,
 allocator: Allocator,
 
 const Self = @This();
@@ -14,6 +15,7 @@ const Self = @This();
 pub fn init(allocator: Allocator, buf: []const u8) Self {
     return .{
         .buf = buf,
+        .len = @intCast(buf.len),
         .allocator = allocator,
     };
 }
@@ -27,6 +29,7 @@ pub fn new(allocator: Allocator, buf: []const u8) !Self {
 pub fn reinit(self: *Self, buf: []const u8) void {
     self.deinit();
     self.buf = buf;
+    self.len = @intCast(buf.len);
 }
 
 pub fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
@@ -39,10 +42,7 @@ pub fn fromHex(allocator: Allocator, hex_str: []const u8) !Self {
     errdefer allocator.free(buf);
     _ = try std.fmt.hexToBytes(buf, hex_str);
 
-    return .{
-        .buf = buf,
-        .allocator = allocator,
-    };
+    return Self.init(allocator, buf);
 }
 
 pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
@@ -51,16 +51,13 @@ pub fn fromBase64(allocator: Allocator, base64_str: []const u8) !Self {
     const buf = try allocator.alloc(u8, len);
     errdefer allocator.free(buf);
     try decoder.decode(buf, base64_str);
-    return .{
-        .buf = buf,
-        .allocator = allocator,
-    };
+    return Self.init(allocator, buf);
 }
 
-pub fn hammingDistance(self: Self, other: Self) usize {
-    if (self.buf.len != other.buf.len) @panic("Cannot get hamming distance of differently-sized data.");
+pub fn hammingDistance(self: Self, other: Self) u32 {
+    if (self.len != other.len) @panic("Cannot get hamming distance of differently-sized data.");
 
-    var distance: usize = 0;
+    var distance: u32 = 0;
     for (self.buf, other.buf) |l, r| {
         distance += @popCount(l ^ r);
     }
@@ -88,7 +85,7 @@ const DataString = struct {
 };
 
 pub fn hex(self: Self) !DataString {
-    const len = self.buf.len * 2;
+    const len = self.len * 2;
     const buf = try self.allocator.alloc(u8, len);
     const charset = "0123456789abcdef";
     for (self.buf, 0..) |b, i| {
@@ -103,7 +100,7 @@ pub fn hex(self: Self) !DataString {
 
 pub fn base64(self: Self) !DataString {
     const encoder = std.base64.standard.Encoder;
-    const len = encoder.calcSize(self.buf.len);
+    const len = encoder.calcSize(self.len);
     const buf = try self.allocator.alloc(u8, len);
     _ = encoder.encode(buf, self.buf);
     return DataString{

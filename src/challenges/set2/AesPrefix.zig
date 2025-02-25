@@ -30,11 +30,11 @@ pub fn encrypt(self: *Self, data: *Data) !void {
     const hidden_plaintext = try Data.fromBase64(allocator, hidden_string);
     defer hidden_plaintext.deinit();
 
-    const len = data.buf.len + hidden_plaintext.buf.len;
+    const len = data.len + hidden_plaintext.len;
     const plaintext = try allocator.alloc(u8, len);
 
-    @memcpy(plaintext[0..data.buf.len], data.buf);
-    @memcpy(plaintext[data.buf.len..], hidden_plaintext.buf);
+    @memcpy(plaintext[0..data.len], data.buf);
+    @memcpy(plaintext[data.len..], hidden_plaintext.buf);
 
     data.reinit(plaintext);
     try data.pad(16);

@@ -29,7 +29,7 @@ pub fn encrypt(data: *Data, cipher: Cipher) !void {
 
 // PKCS#7 padding scheme.
 pub fn pad(data: *Data, block_size: u8) !void {
-    const len = data.buf.len;
+    const len = data.len;
     if (len % block_size == 0) return;
     const padding_len: u8 = @intCast(block_size - len % block_size);
 
@@ -44,7 +44,7 @@ pub fn pad(data: *Data, block_size: u8) !void {
 
 pub fn unpad(data: *Data) !void {
     const allocator = data.allocator;
-    const len = data.buf.len;
+    const len = data.len;
     const last_byte = data.buf[len - 1];
 
     if (len < last_byte or !std.mem.allEqual(u8, data.buf[len - last_byte ..], last_byte)) {

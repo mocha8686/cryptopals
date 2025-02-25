@@ -29,8 +29,8 @@ pub fn aesProfileCutPaste(allocator: Allocator, blackbox: EncDec) !Profile {
 
     try enc.encrypt(&data);
 
-    const tampered_buf = try allocator.alloc(u8, data.buf.len);
-    @memcpy(tampered_buf[0 .. tampered_buf.len - 16], data.buf[0 .. data.buf.len - 16]);
+    const tampered_buf = try allocator.alloc(u8, data.len);
+    @memcpy(tampered_buf[0 .. tampered_buf.len - 16], data.buf[0 .. data.len - 16]);
     @memcpy(tampered_buf[tampered_buf.len - 16 ..], admin.buf);
     data.reinit(tampered_buf);
 
@@ -41,7 +41,7 @@ pub fn aesProfileCutPaste(allocator: Allocator, blackbox: EncDec) !Profile {
     return profile;
 }
 
-fn getAdminCiphertext(allocator: Allocator, blackbox: Encrypter, bytes_until_next_block: usize, block_size: usize, email_index: usize) !Data {
+fn getAdminCiphertext(allocator: Allocator, blackbox: Encrypter, bytes_until_next_block: u32, block_size: u32, email_index: u32) !Data {
     var buf = try allocator.alloc(u8, bytes_until_next_block + block_size);
     @memset(buf[0..bytes_until_next_block], 'A');
     const admin_payload = "admin";

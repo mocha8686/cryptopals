@@ -4,7 +4,7 @@ const Data = @import("../Data.zig");
 const aes = std.crypto.core.aes;
 
 pub fn aes128EcbDecrypt(data: *Data, key: [16]u8) !void {
-    const len = data.buf.len;
+    const len = data.len;
     if (len % 16 != 0) {
         return error.InvalidDataLength;
     }
@@ -24,7 +24,7 @@ pub fn aes128EcbDecrypt(data: *Data, key: [16]u8) !void {
 }
 
 pub fn aes128CbcDecrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
-    const len = data.buf.len;
+    const len = data.len;
     if (len % 16 != 0) {
         return error.InvalidDataLength;
     }
@@ -52,7 +52,7 @@ pub fn aes128CbcDecrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
 }
 
 pub fn aes128EcbEncrypt(data: *Data, key: [16]u8) !void {
-    const len = data.buf.len;
+    const len = data.len;
     if (len % 16 != 0) {
         return error.InvalidDataLength;
     }
@@ -72,7 +72,7 @@ pub fn aes128EcbEncrypt(data: *Data, key: [16]u8) !void {
 }
 
 pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
-    const len = data.buf.len;
+    const len = data.len;
     if (len % 16 != 0) {
         return error.InvalidDataLength;
     }
@@ -98,14 +98,14 @@ pub fn aes128CbcEncrypt(data: *Data, key: [16]u8, iv: [16]u8) !void {
     data.reinit(res_buf);
 }
 
-pub fn aesEcb128Score(data: Data) !usize {
-    const len = data.buf.len;
+pub fn aesEcb128Score(data: Data) !u32 {
+    const len = data.len;
     if (len % 16 != 0) {
         return error.InvalidDataLength;
     }
 
     const n = len / 16;
-    var res: usize = 0;
+    var res: u32 = 0;
     for (0..n) |i| {
         const ia = i * 16;
         const ib = (i + 1) * 16;

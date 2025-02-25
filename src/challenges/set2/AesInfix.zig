@@ -22,7 +22,7 @@ pub fn new(allocator: Allocator, prefix_length: ?u8) !Self {
     var key: [16]u8 = undefined;
     rand.bytes(&key);
 
-    const prefix = try allocator.alloc(u8, prefix_length orelse rand.uintAtMost(usize, 64));
+    const prefix = try allocator.alloc(u8, prefix_length orelse rand.uintAtMost(u32, 64));
     rand.bytes(prefix);
 
     return .{
@@ -38,11 +38,11 @@ pub fn encrypt(self: *Self, data: *Data) !void {
     const hidden_plaintext = try Data.fromBase64(allocator, hidden_string);
     defer hidden_plaintext.deinit();
 
-    const len = self.prefix.len + data.buf.len + hidden_plaintext.buf.len;
+    const len = self.prefix.len + data.len + hidden_plaintext.len;
     const plaintext = try allocator.alloc(u8, len);
 
     const a = self.prefix.len;
-    const b = a + data.buf.len;
+    const b = a + data.len;
 
     @memcpy(plaintext[0..a], self.prefix);
     @memcpy(plaintext[a..b], data.buf);
