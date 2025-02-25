@@ -6,6 +6,7 @@ const AesEcbOrCbc = @import("set2/AesEcbOrCbc.zig");
 const AesInfix = @import("set2/AesInfix.zig");
 const AesPrefix = @import("set2/AesPrefix.zig");
 const AesProfile = @import("set2/AesProfile.zig");
+const AesComments = @import("set2/AesComments.zig");
 
 const allocator = std.testing.allocator;
 
@@ -157,4 +158,16 @@ test "[S3] challenge 14 random prefix len x10" {
             res.buf,
         );
     }
+}
+
+test "challenge 16" {
+    var blackbox = try AesComments.new();
+
+    var res = try attack.aesCbcBitflip(allocator, blackbox.encrypter());
+    defer res.deinit();
+
+    try blackbox.decrypt(&res);
+
+    const admin = std.mem.containsAtLeast(u8, res.buf, 1, ";admin=true;");
+    try std.testing.expect(admin);
 }
