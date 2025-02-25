@@ -99,21 +99,21 @@ test "[S1] challenge 12" {
     );
 }
 
-// test "challenge 13" {
-//     var profile_blackbox = try AesProfile.withKey("YELLOW SUBMARINE".*);
-//     const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
-//     defer profile.deinit();
-//     try std.testing.expectEqualStrings("admin", profile.role);
-// }
-//
-// test "challenge 13 x100" {
-//     for (0..100) |_| {
-//         var profile_blackbox = try AesProfile.init();
-//         const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
-//         defer profile.deinit();
-//         try std.testing.expectEqualStrings("admin", profile.role);
-//     }
-// }
+test "challenge 13" {
+    var profile_blackbox = try AesProfile.withKey("YELLOW SUBMARINE".*);
+    const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
+    defer profile.deinit();
+    try std.testing.expectEqualStrings("admin", profile.role);
+}
+
+test "challenge 13 x100" {
+    for (0..100) |_| {
+        var profile_blackbox = try AesProfile.init();
+        const profile = try attack.aesProfileCutPaste(allocator, profile_blackbox.encDec());
+        defer profile.deinit();
+        try std.testing.expectEqualStrings("admin", profile.role);
+    }
+}
 
 fn testAesEcbDecipherPostfix(prefix_len: ?u8) !void {
     var infix_blackbox = try AesInfix.new(allocator, prefix_len);

@@ -9,7 +9,7 @@ const Encrypter = blackboxLib.Encrypter;
 pub fn aesEcbDecipherPostfix(allocator: Allocator, blackbox: Encrypter) !Data {
     const block_size = try aes.ecb.findBlockSize(allocator, blackbox);
     const prefix_len = try aes.ecb.getPrefixLen(allocator, blackbox, block_size);
-    const ciphertext_len = try aes.ecb.getCiphertextLen(allocator, blackbox, block_size, prefix_len);
+    const ciphertext_len = try aes.ecb.getPostfixLen(allocator, blackbox, block_size, prefix_len);
     const buf_len = aes.ecb.paddingToNextBlock(prefix_len, block_size) + aes.ecb.alignToNextBlock(ciphertext_len, block_size);
 
     var res = try allocator.alloc(u8, ciphertext_len);

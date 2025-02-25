@@ -13,8 +13,10 @@ pub fn aesProfileCutPaste(allocator: Allocator, blackbox: EncDec) !Profile {
     const dec = blackbox.decrypter();
 
     const block_size = try aes.ecb.findBlockSize(allocator, enc);
-    const bytes_until_next_block = try aes.ecb.findBytesUntilNextBlock(allocator, enc, block_size);
-    const email_index = try aes.ecb.findFirstControllableBlockIndex(allocator, enc, bytes_until_next_block, block_size);
+    const prefix_len = try aes.ecb.getPrefixLen(allocator, enc, block_size);
+
+    const bytes_until_next_block = aes.ecb.paddingToNextBlock(prefix_len, block_size);
+    const email_index = aes.ecb.alignToNextBlock(prefix_len, block_size);
 
     const admin = try getAdminCiphertext(allocator, enc, bytes_until_next_block, block_size, email_index);
     defer admin.deinit();

@@ -61,7 +61,7 @@ pub const ecb = struct {
         unreachable;
     }
 
-    pub fn getCiphertextLen(allocator: Allocator, blackbox: Encrypter, block_size: usize, prefix_len: usize) !usize {
+    pub fn getPostfixLen(allocator: Allocator, blackbox: Encrypter, block_size: usize, prefix_len: usize) !usize {
         const prefix_padding = paddingToNextBlock(prefix_len, block_size);
         const aligned_zero_buf = try allocator.alloc(u8, prefix_padding);
         @memset(aligned_zero_buf, 'A');
