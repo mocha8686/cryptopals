@@ -8,6 +8,12 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run the applicaiton.");
     const debug_step = b.step("debug", "Print the paths to the challenge test executables.");
 
+    const slow = b.option(u3, "slow", "Max slow level of test to include [0,3]") orelse 0;
+    const set = b.option(u8, "set", "The set to test.");
+
+    const options = b.addOptions();
+    options.addOption(u3, "slow", slow);
+
     // Root module
 
     const cryptopals_mod = b.createModule(.{
@@ -18,15 +24,20 @@ pub fn build(b: *std.Build) void {
 
     // Challenges
 
-    const slow = b.option(u3, "slow", "Max slow level of test to include [0,3]") orelse 0;
-    const options = b.addOptions();
-    options.addOption(u3, "slow", slow);
-
     for ([_][]const u8{
         "src/challenges/set1.zig",
         "src/challenges/set2.zig",
-    }) |challenge_path| {
+        "src/challenges/set3.zig",
+    }, 0..) |challenge_path, i| {
+        if (set) |n| {
+            if (n != i + 1) continue;
+        }
+
+        const set_file = std.fs.path.basename(challenge_path);
+        const set_name = set_file[0 .. set_file.len - 4];
+
         const challenge_unit_tests = b.addTest(.{
+            .name = set_name,
             .root_source_file = b.path(challenge_path),
             .target = target,
             .optimize = optimize,
