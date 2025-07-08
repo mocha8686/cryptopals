@@ -13,7 +13,7 @@ const Self = @This();
 pub fn new() !Self {
     var seed: u64 = undefined;
     try std.posix.getrandom(std.mem.asBytes(&seed));
-    var prng = std.rand.DefaultPrng.init(seed);
+    var prng = std.Random.DefaultPrng.init(seed);
     const rand = prng.random();
 
     var key: [16]u8 = undefined;

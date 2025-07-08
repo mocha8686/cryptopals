@@ -1,7 +1,7 @@
 const std = @import("std");
 const cryptopals = @import("cryptopals");
 
-const DefaultPrng = std.rand.DefaultPrng;
+const DefaultPrng = std.Random.DefaultPrng;
 
 const Encrypter = cryptopals.blackbox.Encrypter;
 const Decrypter = cryptopals.blackbox.Decrypter;

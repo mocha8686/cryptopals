@@ -14,18 +14,18 @@ pub fn init(ptr: anytype) Self {
     const T = @TypeOf(ptr);
     const type_info = @typeInfo(T);
 
-    if (type_info != .Pointer) @compileError("ptr must be a pointer");
-    if (type_info.Pointer.size != .One) @compileError("ptr must be a single item pointer");
+    if (type_info != .pointer) @compileError("ptr must be a pointer");
+    if (type_info.pointer.size != .one) @compileError("ptr must be a single item pointer");
 
     const gen = struct {
         pub fn encrypter(self_ptr: *anyopaque) Encrypter {
             const self: T = @ptrCast(@alignCast(self_ptr));
-            return @call(.always_inline, type_info.Pointer.child.encrypter, .{self});
+            return @call(.always_inline, type_info.pointer.child.encrypter, .{self});
         }
 
         pub fn decrypter(self_ptr: *anyopaque) Decrypter {
             const self: T = @ptrCast(@alignCast(self_ptr));
-            return @call(.always_inline, type_info.Pointer.child.decrypter, .{self});
+            return @call(.always_inline, type_info.pointer.child.decrypter, .{self});
         }
     };
 

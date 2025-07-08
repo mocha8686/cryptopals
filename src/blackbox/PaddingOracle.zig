@@ -5,7 +5,7 @@ const cipherLib = @import("../cipher.zig");
 const Allocator = std.mem.Allocator;
 
 ptr: *anyopaque,
-encryptPtr: *const fn (ptr: *anyopaque, data: *Data) anyerror!void,
+hasValidPaddingPtr: *const fn (ptr: *anyopaque, data: Data) anyerror!bool,
 
 const Self = @This();
 
@@ -17,18 +17,18 @@ pub fn init(ptr: anytype) Self {
     if (type_info.pointer.size != .one) @compileError("ptr must be a single item pointer");
 
     const gen = struct {
-        pub fn encrypt(self_ptr: *anyopaque, data: *Data) anyerror!void {
+        pub fn hasValidPadding(self_ptr: *anyopaque, data: Data) anyerror!bool {
             const self: T = @ptrCast(@alignCast(self_ptr));
-            return @call(.always_inline, type_info.pointer.child.encrypt, .{ self, data });
+            return @call(.always_inline, type_info.pointer.child.hasValidPadding, .{ self, data });
         }
     };
 
     return .{
         .ptr = ptr,
-        .encryptPtr = gen.encrypt,
+        .hasValidPaddingPtr = gen.hasValidPadding,
     };
 }
 
-pub fn encrypt(self: Self, data: *Data) !void {
-    return self.encryptPtr(self.ptr, data);
+pub fn hasValidPadding(self: Self, data: Data) !bool {
+    return self.hasValidPaddingPtr(self.ptr, data);
 }
