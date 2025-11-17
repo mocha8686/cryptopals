@@ -1,23 +1,27 @@
-//! By convention, root.zig is the root source file when making a library.
 const std = @import("std");
 
-pub fn bufferedPrint() !void {
-    // Stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
+const Data = @import("Data.zig");
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+const Base64 = @import("cipher/Base64.zig");
+const Hex = @import("cipher/Hex.zig");
 
-    try stdout.flush(); // Don't forget to flush!
-}
+test "set 1 challenge 1" {
+    const allocator = std.testing.allocator;
 
-pub fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
+    var data = try Data.copy(
+        allocator,
+        "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d",
+    );
+    defer data.deinit();
 
-test "basic add functionality" {
-    try std.testing.expect(add(3, 7) == 10);
+    const hex = Hex{};
+    try data.decode(hex);
+
+    const base64 = Base64{};
+    try data.encode(base64);
+
+    try std.testing.expectEqualStrings(
+        "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t",
+        data.bytes,
+    );
 }
