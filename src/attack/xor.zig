@@ -37,29 +37,34 @@ pub fn singleCharacterXOR(data: *Data) !u8 {
 pub fn repeatingKeyXOR(data: *Data) !Data {
     const allocator = data.allocator;
 
-    const keysize = guessKeysize(data.*);
+    const keysize = try guessKeysize(data.*);
     var key = try allocator.alloc(u8, keysize);
     errdefer allocator.free(key);
 
-    const blocks = try partition(data, keysize);
+    var blocks = try partition(data.*, keysize);
     defer allocator.free(blocks);
 
-    for (blocks, 0..) |block, n| {
-        key[n] = try repeatingKeyXOR(block);
+    for (0..keysize) |n| {
+        key[n] = try singleCharacterXOR(&blocks[n]);
     }
 
-    var buf = try allocator.alloc(u8, data.len());
+    const buf = try unpartition(allocator, blocks, keysize, data.len());
+    data.reinit(buf);
+    return Data.init(allocator, key);
+}
+
+fn unpartition(allocator: std.mem.Allocator, blocks: []Data, keysize: u32, len: usize) ![]u8 {
+    var buf = try allocator.alloc(u8, len);
     errdefer allocator.free(buf);
 
     for (blocks, 0..) |block, i| {
-        defer allocator.free(block);
-        for (block, 0..) |b, n| {
+        defer block.deinit();
+        for (block.bytes, 0..) |b, n| {
             buf[keysize * n + i] = b;
         }
     }
 
-    data.reinit(buf);
-    return Data.init(allocator, key);
+    return buf;
 }
 
 fn partition(data: Data, keysize: u32) ![]Data {
@@ -68,15 +73,15 @@ fn partition(data: Data, keysize: u32) ![]Data {
     const remainder = data.len() % keysize;
 
     var blocks = try allocator.alloc([]u8, keysize);
-    errdefer allocator.free(blocks);
+    defer allocator.free(blocks);
 
     for (0..keysize) |n| {
-        const blockLength = lengthPerBlock + (if (n < remainder) 1 else 0);
+        const blockLength = lengthPerBlock + (if (n < remainder) @as(usize, 1) else @as(usize, 0));
         blocks[n] = try allocator.alloc(u8, blockLength);
         errdefer allocator.free(blocks[n]);
     }
 
-    const windows = std.mem.window(u8, data.bytes, keysize, keysize);
+    var windows = std.mem.window(u8, data.bytes, keysize, keysize);
     var i: usize = 0;
     while (windows.next()) |window| {
         for (window, 0..) |b, n| {
@@ -94,24 +99,30 @@ fn partition(data: Data, keysize: u32) ![]Data {
     return dataBlocks;
 }
 
-fn guessKeysize(data: Data) u32 {
+fn guessKeysize(data: Data) !u32 {
     const allocator = data.allocator;
 
     var bestScore: u32 = std.math.maxInt(i32);
     var bestKeysize: u32 = 0;
 
-    for (2..40) |size| {
+    for (2..41) |size| {
         var sizeScore: u32 = 0;
         var n: u32 = 0;
 
-        const windows = std.mem.window(u8, data.bytes, size, size);
+        var windows = std.mem.window(u8, data.bytes, size, size);
         var prev: ?[]const u8 = null;
 
         while (windows.next()) |current| {
             if (prev) |previous| {
-                const lhs = Data.init(allocator, previous);
-                const rhs = Data.init(allocator, current);
-                sizeScore += lhs.hammingDistance(rhs) * 100 / size;
+                if (previous.len != current.len) break;
+
+                const lhs = try Data.copy(allocator, previous);
+                defer lhs.deinit();
+
+                const rhs = try Data.copy(allocator, current);
+                defer rhs.deinit();
+
+                sizeScore += lhs.hammingDistance(rhs) * 100 / @as(u32, @intCast(size));
                 n += 1;
             }
             prev = current;
@@ -121,7 +132,7 @@ fn guessKeysize(data: Data) u32 {
 
         if (sizeScore < bestScore) {
             bestScore = sizeScore;
-            bestKeysize = size;
+            bestKeysize = @as(u32, @intCast(size));
         }
     }
 
@@ -178,4 +189,21 @@ test "set 1 challenge 4" {
 
     try std.testing.expectEqual('5', bestKey);
     try std.testing.expectEqualStrings("Now that the party is jumping\n", bestGuess.?.bytes);
+}
+
+test "partition and unpartition" {
+    const allocator = std.testing.allocator;
+    const keysize = 20;
+    const str = "hello, world! how are you today? i'm doing quite fine myself.";
+
+    var data = try Data.copy(allocator, str);
+    defer data.deinit();
+
+    const blocks = try partition(data, keysize);
+    defer allocator.free(blocks);
+
+    const buf = try unpartition(allocator, blocks, keysize, data.len());
+    data.reinit(buf);
+
+    try std.testing.expectEqualStrings(str, data.bytes);
 }
