@@ -29,7 +29,7 @@ pub fn unpad(data: *Data) !void {
         return error.InvalidPadding;
     }
 
-    const buf = try allocator.alloc(u8, len);
-    @memcpy(buf, data.bytes);
+    const buf = try allocator.alloc(u8, len - byte);
+    @memcpy(buf, data.bytes[0..buf.len]);
     data.reinit(buf);
 }
