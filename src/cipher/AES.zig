@@ -61,3 +61,21 @@ fn encodeECB(data: *Data, key: Key(128)) !void {
 
     data.reinit(res);
 }
+
+test "set 1 challenge 7" {
+    const allocator = std.testing.allocator;
+
+    const text = @embedFile("../data/7.txt");
+    const size = std.mem.replacementSize(u8, text, "\n", "");
+    const buf = try allocator.alloc(u8, size);
+    defer allocator.free(buf);
+    _ = std.mem.replace(u8, text, "\n", "", buf);
+
+    var data = try Data.fromBase64(allocator, buf);
+    defer data.deinit();
+
+    const AES = Self{ .mode = .{ .ECB = .{ .key = "YELLOW SUBMARINE".* } } };
+    try data.decode(AES);
+
+    try std.testing.expectEqualStrings(@embedFile("../data/funky.txt"), data.bytes);
+}
