@@ -5,17 +5,8 @@ const Data = @import("../Data.zig");
 const Self = @This();
 
 pub fn decode(_: Self, data: *Data) !void {
-    const allocator = data.allocator;
-
-    const decoder = std.base64.standard.Decoder;
-    const size = try decoder.calcSizeForSlice(data.bytes);
-
-    const buf = try allocator.alloc(u8, size);
-    errdefer allocator.free(buf);
-
-    try decoder.decode(buf, data.bytes);
-
-    data.reinit(buf);
+    const res = try Data.fromBase64(data.allocator, data.bytes);
+    data.reinit(res.bytes);
 }
 
 pub fn encode(_: Self, data: *Data) !void {
