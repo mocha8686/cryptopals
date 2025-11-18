@@ -22,7 +22,7 @@ pub fn encode(_: Self, data: *Data) !void {
     const allocator = data.allocator;
 
     const encoder = std.base64.standard.Encoder;
-    const size = encoder.calcSize(data.bytes.len);
+    const size = encoder.calcSize(data.len());
 
     const buf = try allocator.alloc(u8, size);
     errdefer allocator.free(buf);

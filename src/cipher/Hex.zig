@@ -5,7 +5,7 @@ const Self = @This();
 pub fn decode(_: Self, data: *Data) !void {
     const allocator = data.allocator;
 
-    const buf = try allocator.alloc(u8, data.bytes.len / 2);
+    const buf = try allocator.alloc(u8, data.len() / 2);
     errdefer allocator.free(buf);
 
     _ = try std.fmt.hexToBytes(buf, data.bytes);
@@ -16,7 +16,7 @@ pub fn decode(_: Self, data: *Data) !void {
 pub fn encode(_: Self, data: *Data) !void {
     const allocator = data.allocator;
 
-    const buf = try allocator.alloc(u8, data.bytes.len * 2);
+    const buf = try allocator.alloc(u8, data.len() * 2);
     errdefer allocator.free(buf);
 
     _ = try std.fmt.bufPrint(buf, "{x}", .{data.bytes});

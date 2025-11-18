@@ -54,6 +54,10 @@ pub fn reinit(self: *Self, bytes: []u8) void {
     self.bytes = bytes;
 }
 
+pub fn len(self: Self) usize {
+    return self.bytes.len;
+}
+
 pub fn encode(self: *Self, cipher: anytype) !void {
     try cipher.encode(self);
 }
