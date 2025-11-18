@@ -15,13 +15,13 @@ mode: Mode,
 
 pub fn decode(self: Self, data: *Data) !void {
     switch (self.mode) {
-        .ECB => |c| encodeECB(data, c.key),
+        .ECB => |c| try decodeECB(data, c.key),
     }
 }
 
 pub fn encode(self: Self, data: *Data) !void {
     switch (self.mode) {
-        .ECB => |c| decodeECB(data, c.key),
+        .ECB => |c| try encodeECB(data, c.key),
     }
 }
 
