@@ -34,6 +34,34 @@ pub fn singleCharacterXOR(data: *Data) !u8 {
     return bestChar;
 }
 
+pub fn repeatingKeyXOR(data: *Data) !Data {
+    const allocator = data.allocator;
+
+    const keysize = guessKeysize(data.*);
+    var key = try allocator.alloc(u8, keysize);
+    errdefer allocator.free(key);
+
+    const blocks = try partition(data, keysize);
+    defer allocator.free(blocks);
+
+    for (blocks, 0..) |block, n| {
+        key[n] = try repeatingKeyXOR(block);
+    }
+
+    var buf = try allocator.alloc(u8, data.len());
+    errdefer allocator.free(buf);
+
+    for (blocks, 0..) |block, i| {
+        defer allocator.free(block);
+        for (block, 0..) |b, n| {
+            buf[keysize * n + i] = b;
+        }
+    }
+
+    data.reinit(buf);
+    return Data.init(allocator, key);
+}
+
 fn partition(data: Data, keysize: u32) ![]Data {
     const allocator = data.allocator;
     const lengthPerBlock = data.len() / keysize;
@@ -59,8 +87,8 @@ fn partition(data: Data, keysize: u32) ![]Data {
 
     var dataBlocks = try allocator.alloc(Data, keysize);
     errdefer allocator.free(dataBlocks);
-    for (0..keysize) |i| {
-        dataBlocks[i] = Data.init(allocator, blocks[i]);
+    for (0..keysize) |n| {
+        dataBlocks[n] = Data.init(allocator, blocks[n]);
     }
 
     return dataBlocks;
