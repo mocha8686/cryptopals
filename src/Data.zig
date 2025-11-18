@@ -67,12 +67,20 @@ pub fn encode(self: *Self, cipher: anytype) !void {
 }
 
 pub fn xor(self: *Self, other: Self) !void {
-    if (self.bytes.len != other.bytes.len) {
-        return error.UnequalSizes;
-    }
-
-    for (0..self.bytes.len) |i| {
-        self.bytes[i] = self.bytes[i] ^ other.bytes[i];
+    if (self.len() >= other.len()) {
+        const size = self.len();
+        for (0..size) |i| {
+            const l = other.len();
+            self.bytes[i] = self.bytes[i] ^ other.bytes[i % l];
+        }
+    } else {
+        const size = other.len();
+        const buf = try self.allocator.alloc(u8, size);
+        const l = self.len();
+        for (0..size) |i| {
+            buf[i] = self.bytes[i % l] ^ other.bytes[i];
+        }
+        self.reinit(buf);
     }
 }
 
