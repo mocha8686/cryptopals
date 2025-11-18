@@ -4,6 +4,7 @@ const Data = @import("Data.zig");
 
 const Base64 = @import("cipher/Base64.zig");
 const Hex = @import("cipher/Hex.zig");
+const XOR = @import("cipher/XOR.zig");
 
 test "set 1 challenge 1" {
     const allocator = std.testing.allocator;
@@ -38,7 +39,10 @@ test "set 1 challenge 2" {
     );
     defer rhs.deinit();
 
-    try lhs.xor(rhs);
+    const xor = XOR{
+        .key = rhs,
+    };
+    try lhs.decode(xor);
 
     const hex = Hex{};
     try lhs.encode(hex);
