@@ -48,3 +48,36 @@ test "set 1 challenge 3" {
     try std.testing.expectEqual('X', byte);
     try std.testing.expectEqualStrings("Cooking MC's like a pound of bacon", data.bytes);
 }
+
+test "set 1 challenge 4" {
+    const allocator = std.testing.allocator;
+
+    const text = @embedFile("../data/4.txt");
+    var iter = std.mem.splitScalar(u8, text, '\n');
+
+    var bestGuess: ?Data = null;
+    var bestScore: i32 = std.math.minInt(i32);
+    var bestKey: u8 = undefined;
+
+    defer bestGuess.?.deinit();
+
+    while (iter.next()) |str| {
+        var guess = try Data.fromHex(allocator, str);
+        errdefer guess.deinit();
+        const key = try singleCharacterXOR(&guess);
+        const guessScore = score(guess);
+        if (guessScore > bestScore) {
+            if (bestGuess) |g| {
+                g.deinit();
+            }
+            bestGuess = guess;
+            bestScore = guessScore;
+            bestKey = key;
+        } else {
+            guess.deinit();
+        }
+    }
+
+    try std.testing.expectEqual('5', bestKey);
+    try std.testing.expectEqualStrings("Now that the party is jumping\n", bestGuess.?.bytes);
+}
