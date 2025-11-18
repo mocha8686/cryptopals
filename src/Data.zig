@@ -66,7 +66,16 @@ pub fn decode(self: *Self, cipher: anytype) !void {
     try cipher.decode(self);
 }
 
-pub fn deinit(self: *Self) void {
+pub fn xor(self: *Self, other: Self) !void {
+    if (self.bytes.len != other.bytes.len) {
+        return error.UnequalSizes;
+    }
+
+    for (0..self.bytes.len) |i| {
+        self.bytes[i] = self.bytes[i] ^ other.bytes[i];
+    }
+}
+
+pub fn deinit(self: Self) void {
     self.allocator.free(self.bytes);
-    self.bytes = undefined;
 }
