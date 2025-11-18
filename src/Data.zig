@@ -58,6 +58,14 @@ pub fn len(self: Self) usize {
     return self.bytes.len;
 }
 
+pub fn hammingDistance(self: Self, other: Self) u32 {
+    var res: u32 = 0;
+    for (self.bytes, other.bytes) |a, b| {
+        res += @popCount(a ^ b);
+    }
+    return res;
+}
+
 pub fn decode(self: *Self, cipher: anytype) !void {
     try cipher.decode(self);
 }
@@ -86,4 +94,16 @@ pub fn xor(self: *Self, other: Self) !void {
 
 pub fn deinit(self: Self) void {
     self.allocator.free(self.bytes);
+}
+
+test "hamming distance" {
+    const allocator = std.testing.allocator;
+
+    const lhs = try Self.copy(allocator, "wokka wokka!!!");
+    defer lhs.deinit();
+
+    const rhs = try Self.copy(allocator, "this is a test");
+    defer rhs.deinit();
+
+    try std.testing.expectEqual(37, lhs.hammingDistance(rhs));
 }
