@@ -4,7 +4,7 @@ const Data = @import("../Data.zig");
 const Self = @This();
 
 fn Key(blocksize: comptime_int) type {
-    return [blocksize / 16]u8;
+    return [blocksize / 8]u8;
 }
 
 pub const Mode = union(enum) {
