@@ -1,10 +1,9 @@
 const std = @import("std");
 
-const Data = @import("Data.zig");
+pub const Data = @import("Data.zig");
 
-const Base64 = @import("cipher/Base64.zig");
-const Hex = @import("cipher/Hex.zig");
-const XOR = @import("cipher/XOR.zig");
+pub const cipher = @import("cipher.zig");
+pub const attack = @import("attack.zig");
 
 test "set 1 challenge 1" {
     const allocator = std.testing.allocator;
@@ -15,7 +14,7 @@ test "set 1 challenge 1" {
     );
     defer data.deinit();
 
-    const base64 = Base64{};
+    const base64 = cipher.Base64{};
     try data.encode(base64);
 
     try std.testing.expectEqualStrings(
@@ -39,16 +38,20 @@ test "set 1 challenge 2" {
     );
     defer rhs.deinit();
 
-    const xor = XOR{
+    const xor = cipher.XOR{
         .key = rhs,
     };
     try lhs.decode(xor);
 
-    const hex = Hex{};
+    const hex = cipher.Hex{};
     try lhs.encode(hex);
 
     try std.testing.expectEqualStrings(
         "746865206b696420646f6e277420706c6179",
         lhs.bytes,
     );
+}
+
+test "submodule tests" {
+    std.testing.refAllDeclsRecursive(@This());
 }
