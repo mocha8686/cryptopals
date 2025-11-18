@@ -5,7 +5,15 @@ pub fn pad(data: *Data, blocksize: u32) !void {
     const allocator = data.allocator;
     const len = data.len();
 
-    const byte: u8 = @as(u8, @intCast(@mod((len % blocksize) - 1, blocksize)));
+    const byte: u8 = @as(
+        u8,
+        @intCast(
+            @mod(
+                @as(i32, @intCast(len % blocksize)) - 1,
+                @as(i32, @intCast(blocksize)),
+            ),
+        ),
+    );
     var buf = try allocator.alloc(u8, len + byte);
     @memcpy(buf, data.bytes);
     @memset(buf[len..], byte);
