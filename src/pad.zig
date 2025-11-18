@@ -15,7 +15,7 @@ pub fn pad(data: *Data, blocksize: u32) !void {
         ),
     );
     var buf = try allocator.alloc(u8, len + byte);
-    @memcpy(buf, data.bytes);
+    @memcpy(buf[0..len], data.bytes);
     @memset(buf[len..], byte);
     data.reinit(buf);
 }
