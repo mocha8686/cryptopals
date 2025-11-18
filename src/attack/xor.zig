@@ -34,6 +34,40 @@ pub fn singleCharacterXOR(data: *Data) !u8 {
     return bestChar;
 }
 
+fn guessKeysize(data: Data) u32 {
+    const allocator = data.allocator;
+
+    var bestScore: u32 = std.math.maxInt(i32);
+    var bestKeysize: u32 = 0;
+
+    for (2..40) |size| {
+        var sizeScore: u32 = 0;
+        var n: u32 = 0;
+
+        const windows = std.mem.window(u8, data.bytes, size, size);
+        var prev: ?[]const u8 = null;
+
+        while (windows.next()) |current| {
+            if (prev) |previous| {
+                const lhs = Data.init(allocator, previous);
+                const rhs = Data.init(allocator, current);
+                sizeScore += lhs.hammingDistance(rhs) * 100 / size;
+                n += 1;
+            }
+            prev = current;
+        }
+
+        sizeScore /= n;
+
+        if (sizeScore < bestScore) {
+            bestScore = sizeScore;
+            bestKeysize = size;
+        }
+    }
+
+    return bestKeysize;
+}
+
 test "set 1 challenge 3" {
     const allocator = std.testing.allocator;
 
