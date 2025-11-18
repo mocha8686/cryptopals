@@ -58,12 +58,12 @@ pub fn len(self: Self) usize {
     return self.bytes.len;
 }
 
-pub fn encode(self: *Self, cipher: anytype) !void {
-    try cipher.encode(self);
-}
-
 pub fn decode(self: *Self, cipher: anytype) !void {
     try cipher.decode(self);
+}
+
+pub fn encode(self: *Self, cipher: anytype) !void {
+    try cipher.encode(self);
 }
 
 pub fn xor(self: *Self, other: Self) !void {
