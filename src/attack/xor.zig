@@ -207,3 +207,29 @@ test "partition and unpartition" {
 
     try std.testing.expectEqualStrings(str, data.bytes);
 }
+
+test "set 1 challenge 6" {
+    if (@import("config").slow < 2) {
+        return error.SkipZigTest;
+    }
+
+    const allocator = std.testing.allocator;
+
+    const text = @embedFile("../data/6.txt");
+    const size = std.mem.replacementSize(u8, text, "\n", "");
+    const buf = try allocator.alloc(u8, size);
+    defer allocator.free(buf);
+    _ = std.mem.replace(u8, text, "\n", "", buf);
+
+    var data = try Data.fromBase64(allocator, buf);
+    defer data.deinit();
+
+    const key = try repeatingKeyXOR(&data);
+    defer key.deinit();
+
+    try std.testing.expectEqualStrings("Terminator X: Bring the noise", key.bytes);
+    try std.testing.expectEqualStrings(
+        @embedFile("../data/funky.txt"),
+        data.bytes,
+    );
+}
