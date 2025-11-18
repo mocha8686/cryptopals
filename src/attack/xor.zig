@@ -50,6 +50,10 @@ test "set 1 challenge 3" {
 }
 
 test "set 1 challenge 4" {
+    if (@import("config").slow < 4) {
+        return error.SkipZigTest;
+    }
+
     const allocator = std.testing.allocator;
 
     const text = @embedFile("../data/4.txt");

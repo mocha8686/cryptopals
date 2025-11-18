@@ -9,6 +9,11 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
 
+    const options = b.addOptions();
+
+    const slow = b.option(u3, "slow", "Max slowness class of tests to run. (0 = instant, 5 = very slow)") orelse 0;
+    options.addOption(u3, "slow", slow);
+
     // const exe = b.addExecutable(.{
     //     .name = "cryptopals",
     //     .root_module = b.createModule(.{
@@ -35,6 +40,7 @@ pub fn build(b: *std.Build) void {
     const mod_tests = b.addTest(.{
         .root_module = mod,
     });
+    mod_tests.root_module.addOptions("config", options);
     const run_mod_tests = b.addRunArtifact(mod_tests);
 
     // const exe_tests = b.addTest(.{
