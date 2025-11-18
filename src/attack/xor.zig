@@ -34,6 +34,38 @@ pub fn singleCharacterXOR(data: *Data) !u8 {
     return bestChar;
 }
 
+fn partition(data: Data, keysize: u32) ![]Data {
+    const allocator = data.allocator;
+    const lengthPerBlock = data.len() / keysize;
+    const remainder = data.len() % keysize;
+
+    var blocks = try allocator.alloc([]u8, keysize);
+    errdefer allocator.free(blocks);
+
+    for (0..keysize) |n| {
+        const blockLength = lengthPerBlock + (if (n < remainder) 1 else 0);
+        blocks[n] = try allocator.alloc(u8, blockLength);
+        errdefer allocator.free(blocks[n]);
+    }
+
+    const windows = std.mem.window(u8, data.bytes, keysize, keysize);
+    var i: usize = 0;
+    while (windows.next()) |window| {
+        for (window, 0..) |b, n| {
+            blocks[n][i] = b;
+        }
+        i += 1;
+    }
+
+    var dataBlocks = try allocator.alloc(Data, keysize);
+    errdefer allocator.free(dataBlocks);
+    for (0..keysize) |i| {
+        dataBlocks[i] = Data.init(allocator, blocks[i]);
+    }
+
+    return dataBlocks;
+}
+
 fn guessKeysize(data: Data) u32 {
     const allocator = data.allocator;
 
