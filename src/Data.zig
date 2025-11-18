@@ -24,6 +24,31 @@ pub fn copy(allocator: Allocator, buf: []const u8) !Self {
     };
 }
 
+pub fn fromHex(allocator: Allocator, input: []const u8) !Self {
+    const bytes = try allocator.alloc(u8, input.len / 2);
+    errdefer allocator.free(bytes);
+    _ = try std.fmt.hexToBytes(bytes, input);
+    return Self{
+        .allocator = allocator,
+        .bytes = bytes,
+    };
+}
+
+pub fn fromBase64(allocator: Allocator, input: []const u8) !Self {
+    const decoder = std.base64.standard.Decoder;
+    const size = try decoder.calcSizeForSlice(input);
+
+    const bytes = try allocator.alloc(u8, size);
+    errdefer allocator.free(bytes);
+
+    try decoder.decode(bytes, input);
+
+    return Self{
+        .allocator = allocator,
+        .bytes = bytes,
+    };
+}
+
 pub fn reinit(self: *Self, bytes: []u8) void {
     self.deinit();
     self.bytes = bytes;

@@ -8,14 +8,11 @@ const Hex = @import("cipher/Hex.zig");
 test "set 1 challenge 1" {
     const allocator = std.testing.allocator;
 
-    var data = try Data.copy(
+    var data = try Data.fromHex(
         allocator,
         "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d",
     );
     defer data.deinit();
-
-    const hex = Hex{};
-    try data.decode(hex);
 
     const base64 = Base64{};
     try data.encode(base64);
