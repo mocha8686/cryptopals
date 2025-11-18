@@ -35,12 +35,12 @@ fn decodeECB(data: *Data, key: Key(128)) !void {
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
     var i: u32 = 0;
     while (windows.next()) |block| {
-        aes.decrypt(&res[i * blocksize], block);
+        aes.decrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
         i += 1;
     }
 
     data.reinit(res);
-    try data.unpad(blocksize);
+    try data.unpad();
 }
 
 fn encodeECB(data: *Data, key: Key(128)) !void {
@@ -55,7 +55,7 @@ fn encodeECB(data: *Data, key: Key(128)) !void {
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
     var i: u32 = 0;
     while (windows.next()) |block| {
-        aes.encrypt(&res[i * blocksize], block);
+        aes.encrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
         i += 1;
     }
 
