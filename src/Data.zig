@@ -1,6 +1,8 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 
+const padding = @import("pad.zig");
+
 const Self = @This();
 
 allocator: Allocator,
@@ -56,6 +58,14 @@ pub fn reinit(self: *Self, bytes: []u8) void {
 
 pub fn len(self: Self) usize {
     return self.bytes.len;
+}
+
+pub fn pad(self: *Self, blocksize: u32) !void {
+    try padding.pad(self, blocksize);
+}
+
+pub fn unpad(self: *Self) !void {
+    try padding.unpad(self);
 }
 
 pub fn hammingDistance(self: Self, other: Self) u32 {
