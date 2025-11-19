@@ -89,7 +89,7 @@ pub fn xor(self: *Self, other: Self) !void {
         const size = self.len();
         for (0..size) |i| {
             const l = other.len();
-            self.bytes[i] = self.bytes[i] ^ other.bytes[i % l];
+            self.bytes[i] ^= other.bytes[i % l];
         }
     } else {
         const size = other.len();
