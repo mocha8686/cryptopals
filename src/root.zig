@@ -38,10 +38,7 @@ test "set 1 challenge 2" {
     );
     defer rhs.deinit();
 
-    const xor = cipher.XOR{
-        .key = rhs,
-    };
-    try lhs.decode(xor);
+    try lhs.xor(rhs);
 
     const hex = cipher.Hex{};
     try lhs.encode(hex);
