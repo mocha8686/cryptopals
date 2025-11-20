@@ -51,7 +51,7 @@ test "set 1 challenge 5" {
 
     try data.xor(key);
 
-    const hex = @import("../cipher/Hex.zig"){};
+    const hex = @import("Hex.zig"){};
     try data.encode(hex);
 
     try std.testing.expectEqualStrings(
