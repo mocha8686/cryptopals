@@ -12,7 +12,7 @@ pub fn singleCharacterXOR(data: *Data) !u8 {
     var bestScore: i32 = score(bestGuess);
     var bestChar: u8 = 0;
 
-    for (0..std.math.maxInt(u8)) |n| {
+    for (1..std.math.maxInt(u8)) |n| {
         const c: u8 = @intCast(n);
 
         var guess = try Data.copy(data.allocator, &.{c});
