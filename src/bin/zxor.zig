@@ -60,43 +60,45 @@ pub fn main() !void {
     const inputFormat: Format = res.args.input orelse .bytes;
     const outputFormat: Format = res.args.output orelse .bytes;
 
-    if (res.positionals.len > 0) {
-        const input = res.positionals[0].?;
-        var data = try parseInput(allocator, input, inputFormat);
+    var data = if (res.positionals[0]) |input| blk: {
+        const data = try Data.copy(allocator, input);
+        break :blk data;
+    } else blk: {
+        var reader = std.fs.File.stdin().readerStreaming("");
+        const input = try reader.interface.allocRemaining(allocator, .unlimited);
+        const data = Data.init(allocator, input);
+        break :blk data;
+    };
 
-        if (res.args.key) |keyStr| {
-            const key = try Data.copy(allocator, keyStr);
-            const cipher = cryptopals.cipher.XOR{ .key = key };
+    try formatInput(&data, inputFormat);
 
-            try data.decode(cipher);
-        } else if (res.args.brute != 0) {
-            const key = try cryptopals.attack.xor.repeatingKeyXOR(&data);
+    if (res.args.key) |keyStr| {
+        const key = try Data.copy(allocator, keyStr);
+        const cipher = cryptopals.cipher.XOR{ .key = key };
 
-            _ = try stderr.write("Key: ");
-            _ = try stderr.write(key.bytes);
-            _ = try stderr.write("\n================\n");
-        } else {
-            _ = try stderr.write("You must specify either -k or -b.");
-            return;
-        }
+        try data.decode(cipher);
+    } else if (res.args.brute != 0) {
+        const key = try cryptopals.attack.xor.repeatingKeyXOR(&data);
 
-        try formatOutput(&data, outputFormat);
-        _ = try stdout.write(data.bytes);
+        _ = try stderr.write("Key: ");
+        _ = try stderr.write(key.bytes);
+        _ = try stderr.write("\n================\n");
     } else {
-        std.debug.print("Stdin not implemented\n");
+        _ = try stderr.write("You must specify either -k or -b.");
         return;
     }
+
+    try formatOutput(&data, outputFormat);
+    _ = try stdout.write(data.bytes);
 
     if (res.args.@"no-newline" == 0) {
         _ = try stdout.write("\n");
     }
 }
 
-fn parseInput(allocator: Allocator, input: []const u8, format: Format) !Data {
-    var data = try Data.copy(allocator, input);
-
+fn formatInput(data: *Data, format: Format) !void {
     switch (format) {
-        .bytes => {},
+        .bytes => return,
         .hex => {
             const cipher = cryptopals.cipher.Hex{};
             try data.decode(cipher);
@@ -106,8 +108,6 @@ fn parseInput(allocator: Allocator, input: []const u8, format: Format) !Data {
             try data.decode(cipher);
         },
     }
-
-    return data;
 }
 
 fn formatOutput(data: *Data, format: Format) !void {
