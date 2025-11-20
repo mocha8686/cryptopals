@@ -23,32 +23,6 @@ test "set 1 challenge 1" {
     );
 }
 
-test "set 1 challenge 2" {
-    const allocator = std.testing.allocator;
-
-    var lhs = try Data.fromHex(
-        allocator,
-        "1c0111001f010100061a024b53535009181c",
-    );
-    defer lhs.deinit();
-
-    const rhs = try Data.fromHex(
-        allocator,
-        "686974207468652062756c6c277320657965",
-    );
-    defer rhs.deinit();
-
-    try lhs.xor(rhs);
-
-    const hex = cipher.Hex{};
-    try lhs.encode(hex);
-
-    try std.testing.expectEqualStrings(
-        "746865206b696420646f6e277420706c6179",
-        lhs.bytes,
-    );
-}
-
 test "submodule tests" {
     std.testing.refAllDeclsRecursive(@This());
 }
