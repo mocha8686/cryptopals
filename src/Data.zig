@@ -80,6 +80,10 @@ pub fn encode(self: *Self, cipher: anytype) !void {
     try cipher.encode(self);
 }
 
+pub fn process(self: *Self, blackbox: anytype) !void {
+    try blackbox.process(self);
+}
+
 pub fn xor(self: *Self, other: []const u8) !void {
     if (self.len() >= other.len) {
         const size = self.len();
