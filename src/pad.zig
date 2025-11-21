@@ -34,6 +34,20 @@ pub fn unpad(data: *Data) !void {
     data.reinit(buf);
 }
 
+test "set 2 challenge 9" {
+    const allocator = std.testing.allocator;
+
+    var data = try Data.copy(allocator, "YELLOW SUBMARINE");
+    defer data.deinit();
+
+    try data.pad(20);
+
+    try std.testing.expectEqualStrings(
+        "YELLOW SUBMARINE\x04\x04\x04\x04",
+        data.bytes,
+    );
+}
+
 test "pads blocksize-even string" {
     const allocator = std.testing.allocator;
 
