@@ -3,33 +3,13 @@ const Data = @import("../Data.zig");
 
 const Self = @This();
 
-fn Key(blocksize: comptime_int) type {
-    return [blocksize / 8]u8;
-}
-
-pub const Mode = union(enum) {
-    ECB: struct { key: Key(128) },
-};
-
-mode: Mode,
+key: [16]u8,
 
 pub fn decode(self: Self, data: *Data) !void {
-    switch (self.mode) {
-        .ECB => |c| try decodeECB(data, c.key),
-    }
-}
-
-pub fn encode(self: Self, data: *Data) !void {
-    switch (self.mode) {
-        .ECB => |c| try encodeECB(data, c.key),
-    }
-}
-
-fn decodeECB(data: *Data, key: Key(128)) !void {
     const allocator = data.allocator;
     const blocksize = 16;
 
-    const aes = std.crypto.core.aes.Aes128.initDec(key);
+    const aes = std.crypto.core.aes.Aes128.initDec(self.key);
     var res = try allocator.alloc(u8, data.len());
 
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
@@ -43,13 +23,13 @@ fn decodeECB(data: *Data, key: Key(128)) !void {
     try data.unpad();
 }
 
-fn encodeECB(data: *Data, key: Key(128)) !void {
+pub fn encode(self: Self, data: *Data) !void {
     const allocator = data.allocator;
     const blocksize = 16;
 
     try data.pad(blocksize);
 
-    const aes = std.crypto.core.aes.Aes128.initEnc(key);
+    const aes = std.crypto.core.aes.Aes128.initEnc(self.key);
     var res = try allocator.alloc(u8, data.len());
 
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
@@ -74,7 +54,7 @@ test "set 1 challenge 7" {
     var data = try Data.fromBase64(allocator, buf);
     defer data.deinit();
 
-    const AES = Self{ .mode = .{ .ECB = .{ .key = "YELLOW SUBMARINE".* } } };
+    const AES = Self{ .key = "YELLOW SUBMARINE".* };
     try data.decode(AES);
 
     try std.testing.expectEqualStrings(@embedFile("../data/funky.txt"), data.bytes);
