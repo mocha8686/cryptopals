@@ -68,12 +68,8 @@ pub fn unpad(self: *Self) !void {
     try padding.unpad(self);
 }
 
-pub fn hammingDistance(self: Self, other: Self) u32 {
-    var res: u32 = 0;
-    for (self.bytes, other.bytes) |a, b| {
-        res += @popCount(a ^ b);
-    }
-    return res;
+pub fn hammingDistance(self: Self, other: []const u8) u32 {
+    return @import("hammingDistance.zig").hammingDistance(self.bytes, other);
 }
 
 pub fn decode(self: *Self, cipher: anytype) !void {
@@ -84,19 +80,19 @@ pub fn encode(self: *Self, cipher: anytype) !void {
     try cipher.encode(self);
 }
 
-pub fn xor(self: *Self, other: Self) !void {
-    if (self.len() >= other.len()) {
+pub fn xor(self: *Self, other: []const u8) !void {
+    if (self.len() >= other.len) {
         const size = self.len();
         for (0..size) |i| {
-            const l = other.len();
-            self.bytes[i] ^= other.bytes[i % l];
+            const l = other.len;
+            self.bytes[i] ^= other[i % l];
         }
     } else {
-        const size = other.len();
+        const size = other.len;
         const buf = try self.allocator.alloc(u8, size);
         const l = self.len();
         for (0..size) |i| {
-            buf[i] = self.bytes[i % l] ^ other.bytes[i];
+            buf[i] = self.bytes[i % l] ^ other[i];
         }
         self.reinit(buf);
     }
@@ -104,16 +100,4 @@ pub fn xor(self: *Self, other: Self) !void {
 
 pub fn deinit(self: Self) void {
     self.allocator.free(self.bytes);
-}
-
-test "hamming distance" {
-    const allocator = std.testing.allocator;
-
-    const lhs = try Self.copy(allocator, "wokka wokka!!!");
-    defer lhs.deinit();
-
-    const rhs = try Self.copy(allocator, "this is a test");
-    defer rhs.deinit();
-
-    try std.testing.expectEqual(37, lhs.hammingDistance(rhs));
 }

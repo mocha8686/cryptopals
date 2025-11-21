@@ -4,6 +4,7 @@ pub const Data = @import("Data.zig");
 
 pub const cipher = @import("cipher.zig");
 pub const attack = @import("attack.zig");
+pub const hammingDistance = @import("hammingDistance.zig").hammingDistance;
 
 test "set 1 challenge 1" {
     const allocator = std.testing.allocator;

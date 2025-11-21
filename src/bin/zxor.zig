@@ -72,8 +72,7 @@ pub fn main() !void {
 
     try formatInput(&data, inputFormat);
 
-    if (res.args.key) |keyStr| {
-        const key = try Data.copy(allocator, keyStr);
+    if (res.args.key) |key| {
         const cipher = cryptopals.cipher.XOR{ .key = key };
 
         try data.decode(cipher);

@@ -2,7 +2,7 @@ const Data = @import("../Data.zig");
 
 const Self = @This();
 
-key: Data,
+key: []const u8,
 
 pub fn decode(self: Self, data: *Data) !void {
     try data.xor(self.key);
@@ -28,7 +28,7 @@ test "set 1 challenge 2" {
     );
     defer rhs.deinit();
 
-    try lhs.xor(rhs);
+    try lhs.xor(rhs.bytes);
 
     const hex = @import("Hex.zig"){};
     try lhs.encode(hex);
@@ -46,10 +46,7 @@ test "set 1 challenge 5" {
     var data = try Data.copy(allocator, "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal");
     defer data.deinit();
 
-    const key = try Data.copy(allocator, "ICE");
-    defer key.deinit();
-
-    try data.xor(key);
+    try data.xor("ICE");
 
     const hex = @import("Hex.zig"){};
     try data.encode(hex);

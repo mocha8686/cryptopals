@@ -1,43 +1,34 @@
 const std = @import("std");
 const Data = @import("../Data.zig");
 const score = @import("score.zig").score;
+const hammingDistance = @import("../hammingDistance.zig").hammingDistance;
 
 pub fn singleCharacterXOR(data: *Data) !u8 {
-    var bestGuess: Data = blk: {
-        var guess = try Data.copy(data.allocator, &.{0});
-        errdefer guess.deinit();
-        try guess.xor(data.*);
-        break :blk guess;
-    };
-    var bestScore: i32 = score(bestGuess);
+    var bestScore: i32 = std.math.minInt(i32);
     var bestChar: u8 = 0;
 
-    for (1..std.math.maxInt(u8)) |n| {
+    for (0..std.math.maxInt(u8)) |n| {
         const c: u8 = @intCast(n);
 
-        var guess = try Data.copy(data.allocator, &.{c});
-        errdefer guess.deinit();
+        try data.xor(&.{c});
 
-        try guess.xor(data.*);
-        const guessScore = score(guess);
+        const guessScore = score(data.bytes);
         if (guessScore > bestScore) {
-            bestGuess.deinit();
             bestScore = guessScore;
-            bestGuess = guess;
             bestChar = c;
-        } else {
-            guess.deinit();
         }
+
+        try data.xor(&.{c});
     }
 
-    data.reinit(bestGuess.bytes);
+    try data.xor(&.{bestChar});
     return bestChar;
 }
 
 pub fn repeatingKeyXOR(data: *Data) !Data {
     const allocator = data.allocator;
 
-    const keysize = try guessKeysize(data.*);
+    const keysize = guessKeysize(data.bytes);
     var key = try allocator.alloc(u8, keysize);
     errdefer allocator.free(key);
 
@@ -99,9 +90,7 @@ fn partition(data: Data, keysize: u32) ![]Data {
     return dataBlocks;
 }
 
-fn guessKeysize(data: Data) !u32 {
-    const allocator = data.allocator;
-
+fn guessKeysize(bytes: []const u8) u32 {
     var bestScore: u32 = std.math.maxInt(i32);
     var bestKeysize: u32 = 0;
 
@@ -109,20 +98,13 @@ fn guessKeysize(data: Data) !u32 {
         var sizeScore: u32 = 0;
         var n: u32 = 0;
 
-        var windows = std.mem.window(u8, data.bytes, keysize, keysize);
+        var windows = std.mem.window(u8, bytes, keysize, keysize);
         var prev: ?[]const u8 = null;
 
         while (windows.next()) |current| {
             if (prev) |previous| {
                 if (previous.len != current.len) break;
-
-                const lhs = try Data.copy(allocator, previous);
-                defer lhs.deinit();
-
-                const rhs = try Data.copy(allocator, current);
-                defer rhs.deinit();
-
-                sizeScore += lhs.hammingDistance(rhs);
+                sizeScore += hammingDistance(previous, current);
                 n += 1;
             }
             prev = current;

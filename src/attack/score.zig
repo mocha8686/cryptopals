@@ -36,9 +36,9 @@ const frequencies: []const FrequencyKV = &.{
 };
 const map = Frequencies.initComptime(frequencies);
 
-pub fn score(data: Data) i32 {
+pub fn score(bytes: []const u8) i32 {
     var res: i32 = 0;
-    for (data.bytes) |b| {
+    for (bytes) |b| {
         res += map.get(&.{std.ascii.toLower(b)}) orelse -1000;
     }
     return res;
