@@ -4,6 +4,7 @@ const Data = @import("../Data.zig");
 const Self = @This();
 
 key: [16]u8,
+pad: bool = true,
 
 pub fn decode(self: Self, data: *Data) !void {
     const allocator = data.allocator;
@@ -20,14 +21,19 @@ pub fn decode(self: Self, data: *Data) !void {
     }
 
     data.reinit(res);
-    try data.unpad();
+
+    if (self.pad) {
+        try data.unpad();
+    }
 }
 
 pub fn encode(self: Self, data: *Data) !void {
     const allocator = data.allocator;
     const blocksize = 16;
 
-    try data.pad(blocksize);
+    if (self.pad) {
+        try data.pad(blocksize);
+    }
 
     const encoder = std.crypto.core.aes.Aes128.initEnc(self.key);
     var res = try allocator.alloc(u8, data.len());
