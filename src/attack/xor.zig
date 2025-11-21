@@ -99,15 +99,13 @@ fn guessKeysize(bytes: []const u8) u32 {
         var n: u32 = 0;
 
         var windows = std.mem.window(u8, bytes, keysize, keysize);
-        var prev: ?[]const u8 = null;
+        var previous: []const u8 = windows.first();
 
         while (windows.next()) |current| {
-            if (prev) |previous| {
-                if (previous.len != current.len) break;
-                sizeScore += hammingDistance(previous, current);
-                n += 1;
-            }
-            prev = current;
+            if (previous.len != current.len) break;
+            sizeScore += hammingDistance(previous, current);
+            n += 1;
+            previous = current;
         }
 
         sizeScore *= 100;
