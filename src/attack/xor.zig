@@ -105,11 +105,11 @@ fn guessKeysize(data: Data) !u32 {
     var bestScore: u32 = std.math.maxInt(i32);
     var bestKeysize: u32 = 0;
 
-    for (2..41) |size| {
+    for (2..41) |keysize| {
         var sizeScore: u32 = 0;
         var n: u32 = 0;
 
-        var windows = std.mem.window(u8, data.bytes, size, size);
+        var windows = std.mem.window(u8, data.bytes, keysize, keysize);
         var prev: ?[]const u8 = null;
 
         while (windows.next()) |current| {
@@ -122,17 +122,18 @@ fn guessKeysize(data: Data) !u32 {
                 const rhs = try Data.copy(allocator, current);
                 defer rhs.deinit();
 
-                sizeScore += lhs.hammingDistance(rhs) * 100 / @as(u32, @intCast(size));
+                sizeScore += lhs.hammingDistance(rhs);
                 n += 1;
             }
             prev = current;
         }
 
-        sizeScore /= n;
+        sizeScore *= 100;
+        sizeScore /= n * @as(u32, @intCast(keysize));
 
         if (sizeScore < bestScore) {
             bestScore = sizeScore;
-            bestKeysize = @as(u32, @intCast(size));
+            bestKeysize = @as(u32, @intCast(keysize));
         }
     }
 
