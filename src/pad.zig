@@ -9,11 +9,11 @@ pub fn pad(data: *Data, blocksize: u32) !void {
         u8,
         @intCast(
             @mod(
-                @as(i32, @intCast(len % blocksize)) - 1,
+                @as(i32, @intCast(blocksize - (len % blocksize))) - 1,
                 @as(i32, @intCast(blocksize)),
             ),
         ),
-    );
+    ) + 1;
     var buf = try allocator.alloc(u8, len + byte);
     @memcpy(buf[0..len], data.bytes);
     @memset(buf[len..], byte);
@@ -32,4 +32,18 @@ pub fn unpad(data: *Data) !void {
     const buf = try allocator.alloc(u8, len - byte);
     @memcpy(buf, data.bytes[0..buf.len]);
     data.reinit(buf);
+}
+
+test "pads blocksize-even string" {
+    const allocator = std.testing.allocator;
+
+    var data = try Data.copy(allocator, "meow");
+    defer data.deinit();
+
+    try data.pad(4);
+
+    try std.testing.expectEqualStrings(
+        "meow\x04\x04\x04\x04",
+        data.bytes,
+    );
 }
