@@ -9,13 +9,13 @@ pub fn decode(self: Self, data: *Data) !void {
     const allocator = data.allocator;
     const blocksize = 16;
 
-    const aes = std.crypto.core.aes.Aes128.initDec(self.key);
+    const decoder = std.crypto.core.aes.Aes128.initDec(self.key);
     var res = try allocator.alloc(u8, data.len());
 
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
     var i: u32 = 0;
     while (windows.next()) |block| {
-        aes.decrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
+        decoder.decrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
         i += 1;
     }
 
@@ -29,13 +29,13 @@ pub fn encode(self: Self, data: *Data) !void {
 
     try data.pad(blocksize);
 
-    const aes = std.crypto.core.aes.Aes128.initEnc(self.key);
+    const encoder = std.crypto.core.aes.Aes128.initEnc(self.key);
     var res = try allocator.alloc(u8, data.len());
 
     var windows = std.mem.window(u8, data.bytes, blocksize, blocksize);
     var i: u32 = 0;
     while (windows.next()) |block| {
-        aes.encrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
+        encoder.encrypt(res[i * blocksize .. (i + 1) * blocksize][0..blocksize], block[0..blocksize]);
         i += 1;
     }
 
