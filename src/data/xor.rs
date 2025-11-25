@@ -86,7 +86,8 @@ mod tests {
     #[test]
     fn s1c5_implement_repeating_key_xor() {
         let data = Data::from(
-            "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal".as_bytes(),
+            "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
+                .as_bytes(),
         );
         let key = Data::from("ICE".as_bytes());
 

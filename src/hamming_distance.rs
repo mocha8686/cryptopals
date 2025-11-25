@@ -5,8 +5,7 @@ where
     L: Iterator<Item = T>,
     R: Iterator<Item = U>,
 {
-    lhs
-        .map(Into::into)
+    lhs.map(Into::into)
         .zip(rhs.map(Into::into))
         .map(|(a, b)| a ^ b)
         .map(u8::count_ones)
