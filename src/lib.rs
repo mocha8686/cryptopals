@@ -1,5 +1,6 @@
 #![allow(clippy::missing_errors_doc, reason = "ignore docs for now")]
 
+pub mod attack;
 pub mod data;
 pub mod error;
 
