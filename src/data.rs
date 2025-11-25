@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 pub mod base64;
 pub mod hex;
+pub mod xor;
 
 #[derive(Debug, Clone)]
 pub struct Data(pub(crate) Box<[u8]>);
