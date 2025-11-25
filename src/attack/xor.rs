@@ -30,4 +30,21 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    #[ignore = "slow"]
+    fn s1c4_detect_single_character_xor() -> Result<()> {
+        let text = include_str!("../../data/4.txt");
+        let (key, data) = text
+            .split_ascii_whitespace()
+            .flat_map(Data::from_hex_str)
+            .map(|data| single_byte_xor(&data))
+            .max_by_key(|(_, data)| score(data.iter()))
+            .unwrap();
+
+        assert_eq!('5', key.into());
+        assert_eq!("Now that the party is jumping\n", data);
+
+        Ok(())
+    }
 }
