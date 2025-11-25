@@ -1,14 +1,7 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+#![allow(clippy::missing_errors_doc, reason = "ignore docs for now")]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod data;
+pub mod error;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use data::Data;
+pub use error::{Error, Result};
