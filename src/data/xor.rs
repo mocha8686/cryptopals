@@ -49,6 +49,23 @@ impl BitXor<&Data> for Data {
     }
 }
 
+impl BitXor<u8> for &Data {
+    type Output = Data;
+
+    fn bitxor(self, rhs: u8) -> Self::Output {
+        let bytes = self.iter().map(|b| b ^ rhs).collect();
+        Data(bytes)
+    }
+}
+
+impl BitXor<u8> for Data {
+    type Output = Data;
+
+    fn bitxor(self, rhs: u8) -> Self::Output {
+        (&self).bitxor(rhs)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Result;
