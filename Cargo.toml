@@ -7,4 +7,5 @@ edition = "2024"
 base64 = "0.22.1"
 hex = "0.4.3"
 miette = "7.6.0"
+phf = { version = "0.13.1", features = ["macros"] }
 thiserror = "2.0.17"
