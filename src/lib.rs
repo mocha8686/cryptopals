@@ -3,6 +3,7 @@
 pub mod attack;
 pub mod data;
 pub mod error;
+pub mod hamming_distance;
 
 pub use data::Data;
 pub use error::{Error, Result};
