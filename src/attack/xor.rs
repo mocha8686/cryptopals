@@ -1,4 +1,4 @@
-use crate::{Data, attack::score::score};
+use crate::{Data, attack::score::score, hamming_distance::hamming_distance};
 
 #[must_use]
 pub fn single_byte_xor(data: &Data) -> (u8, Data) {
@@ -7,6 +7,30 @@ pub fn single_byte_xor(data: &Data) -> (u8, Data) {
         .max_by_key(|(_, data)| score(data.iter()))
     else {
         unreachable!()
+    };
+
+    res
+}
+
+pub fn repeating_key_xor(data: &Data) -> (Data, Data) {
+    todo!()
+}
+
+fn guess_keysize(data: &Data) -> usize {
+    const MAX_KEYSIZE: usize = 40;
+
+    let Some(res) = (2..=MAX_KEYSIZE).max_by_key(|keysize| {
+        let (score, count, _) =
+            data.chunks_exact(*keysize)
+                .fold((0, 0, None), |(acc, n, prev), chunk| {
+                    let res = prev
+                        .map(|prev: &[u8]| hamming_distance(prev.iter(), chunk.iter()))
+                        .unwrap_or(0);
+                    (acc + res, n + 1, Some(chunk))
+                });
+        score * 100 / count / *keysize as u32
+    }) else {
+        unreachable!();
     };
 
     res
