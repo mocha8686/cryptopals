@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{fmt::Display, ops::Deref};
 
 pub mod base64;
 pub mod hex;
@@ -28,6 +28,12 @@ impl<T: AsRef<[u8]>> PartialEq<T> for Data {
 impl PartialEq<Data> for &str {
     fn eq(&self, other: &Data) -> bool {
         &*other.0 == self.as_bytes()
+    }
+}
+
+impl Display for Data {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", String::from_utf8_lossy(self))
     }
 }
 
