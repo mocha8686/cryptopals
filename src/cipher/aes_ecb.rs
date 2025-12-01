@@ -4,19 +4,20 @@ use aes::{
 };
 use itertools::Itertools;
 
-use crate::{Data, Error, Result};
+use crate::{Data, Error, Result, error::InvalidLengthType};
 
 use super::Cipher;
 
 pub struct AesEcb {
-    cipher: Aes128,
-    pad: bool,
+    pub(super) cipher: Aes128,
+    pub(super) pad: bool,
 }
 
 impl AesEcb {
     pub fn new(key: impl AsRef<[u8]>, pad: bool) -> Result<Self> {
         let key = key.as_ref();
         let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
+            kind: InvalidLengthType::Key,
             expected: 16,
             actual: key.len(),
         })?;
@@ -118,3 +119,4 @@ mod tests {
         Ok(())
     }
 }
+
