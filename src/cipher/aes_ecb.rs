@@ -28,7 +28,6 @@ impl AesEcb {
 impl Cipher for AesEcb {
     fn decode(&mut self, data: &Data) -> Result<Data> {
         let bytes = data
-            .pad(16)
             .iter()
             .copied()
             .chunks(16)
