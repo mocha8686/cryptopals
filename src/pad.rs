@@ -11,7 +11,7 @@ use crate::{Data, Error, Result};
 pub fn pad(data: &Data, blocksize: usize) -> Data {
     let blocksize = blocksize as i32;
     let len = data.len() as i32;
-    let padding = (blocksize - (len % blocksize) - 1).rem_euclid(blocksize) as u8;
+    let padding = ((blocksize - (len % blocksize) - 1).rem_euclid(blocksize) + 1) as u8;
 
     let mut bytes = data.to_vec();
     bytes.extend((0..padding).map(|_| padding));
@@ -53,5 +53,22 @@ impl Data {
 
     pub fn unpad(&self) -> Result<Data> {
         unpad(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pad_equal_to_blocksize() {
+        let res = Data::from("hello".as_bytes()).pad(5);
+        assert_eq!("hello\x05\x05\x05\x05\x05", res);
+    }
+
+    #[test]
+    fn s2c9_implement_pkcs7_padding() {
+        let res = Data::from("YELLOW SUBMARINE".as_bytes()).pad(20);
+        assert_eq!("YELLOW SUBMARINE\x04\x04\x04\x04", res);
     }
 }
