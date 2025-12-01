@@ -72,6 +72,20 @@ impl Cipher for AesEcb {
     }
 }
 
+#[must_use]
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "higher scores will be rare"
+)]
+pub fn score(bytes: &[u8]) -> u32 {
+    bytes
+        .chunks(16)
+        .counts()
+        .into_values()
+        .map(|v| v.saturating_sub(1) as u32)
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -84,6 +98,23 @@ mod tests {
         let res = data.decode(&mut cipher)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());
+
+        Ok(())
+    }
+
+    #[test]
+    fn s1c8_detect_aes_in_ecb_mode() -> Result<()> {
+        let text = include_str!("../../data/8.txt");
+        let res = text
+            .split('\n')
+            .flat_map(Data::from_hex_str)
+            .max_by_key(|d| score(d))
+            .unwrap();
+
+        assert_eq!(
+            "d880619740a8a19b7840a8a31c810a3d08649af70dc06f4fd5d2d69c744cd283e2dd052f6b641dbf9d11b0348542bb5708649af70dc06f4fd5d2d69c744cd2839475c9dfdbc1d46597949d9c7e82bf5a08649af70dc06f4fd5d2d69c744cd28397a93eab8d6aecd566489154789a6b0308649af70dc06f4fd5d2d69c744cd283d403180c98c8f6db1f2a3f9c4040deb0ab51b29933f2c123c58386b06fba186a",
+            res.hex()
+        );
 
         Ok(())
     }
