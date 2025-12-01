@@ -7,6 +7,12 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     #[error("Couldn't parse input into `Data`")]
     ParseError(#[from] ParseError),
+
+    #[error("Invalid block length (expected `{expected}`, got `{actual}`)")]
+    InvalidLength { expected: usize, actual: usize },
+
+    #[error("Invalid padding (padding byte: `{0}`)")]
+    InvalidPadding(u8),
 }
 
 #[derive(Error, Debug, Diagnostic)]
