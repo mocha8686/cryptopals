@@ -30,22 +30,18 @@ pub fn repeating_key_xor(data: &Data) -> (Data, Data) {
     (key, data)
 }
 
-#[allow(
-    clippy::cast_possible_truncation,
-    reason = "keysizes that large will be rare"
-)]
-fn guess_keysize(data: &Data) -> usize {
-    const MAX_KEYSIZE: usize = 40;
+fn guess_keysize(data: &Data) -> u32 {
+    const MAX_KEYSIZE: u32 = 40;
 
-    let Some(res) = (2..=MAX_KEYSIZE).min_by_key(|keysize| {
+    let Some(res) = (2u32..=MAX_KEYSIZE).min_by_key(|keysize| {
         let (score, count, _) =
-            data.chunks_exact(*keysize)
+            data.chunks_exact(*keysize as usize)
                 .fold((0, 0, None), |(acc, n, prev), chunk| {
                     let res =
                         prev.map_or(0, |prev: &[u8]| hamming_distance(prev.iter(), chunk.iter()));
                     (acc + res, n + 1, Some(chunk))
                 });
-        score * 100 / count / *keysize as u32
+        score * 100 / count / *keysize
     }) else {
         unreachable!()
     };
@@ -53,14 +49,14 @@ fn guess_keysize(data: &Data) -> usize {
     res
 }
 
-fn partition(data: &Data, keysize: usize) -> Vec<Data> {
+fn partition(data: &Data, keysize: u32) -> Vec<Data> {
     data.iter()
         .copied()
-        .enumerate()
-        .into_group_map_by(|(i, _)| i % keysize)
+        .zip(0u32..)
+        .into_group_map_by(|(_, i)| i % keysize)
         .into_iter()
         .sorted_by_key(|(n, _)| *n)
-        .map(|(_, vec)| vec.into_iter().map(|(_, b)| b).collect_vec())
+        .map(|(_, vec)| vec.into_iter().map(|(b, _)| b).collect_vec())
         .map(Data::from)
         .collect_vec()
 }
@@ -91,9 +87,8 @@ mod tests {
 
     #[test]
     fn s1c3_single_byte_xor_cipher() -> Result<()> {
-        let data = Data::from_hex(
-            "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736",
-        )?;
+        let data =
+            Data::from_hex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")?;
         let (key, res) = single_byte_xor(&data);
 
         assert_eq!('X', key.into());

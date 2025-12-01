@@ -2,16 +2,20 @@ use itertools::Itertools;
 
 use crate::{Data, Error, Result};
 
-#[allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    reason = "larger blocksizes will be very rare"
-)]
 #[must_use]
-pub fn pad(data: &Data, blocksize: usize) -> Data {
-    let blocksize = blocksize as i32;
-    let len = data.len() as i32;
-    let padding = ((blocksize - (len % blocksize) - 1).rem_euclid(blocksize) + 1) as u8;
+#[expect(
+    clippy::cast_possible_truncation,
+    reason = "modulo wraps usize into u8"
+)]
+pub fn pad(data: &Data, blocksize: u8) -> Data {
+    let len = data.len();
+
+    let padding = blocksize as usize - (len % blocksize as usize);
+    let padding = if padding == 0 {
+        blocksize
+    } else {
+        padding as u8
+    };
 
     let mut bytes = data.to_vec();
     bytes.extend((0..padding).map(|_| padding));
@@ -47,7 +51,7 @@ pub fn unpad(data: &Data) -> Result<Data> {
 
 impl Data {
     #[must_use]
-    pub fn pad(&self, blocksize: usize) -> Data {
+    pub fn pad(&self, blocksize: u8) -> Data {
         pad(self, blocksize)
     }
 
