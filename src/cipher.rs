@@ -1,5 +1,6 @@
 use crate::{Data, Result};
 
+pub mod aes_cbc;
 pub mod aes_ecb;
 
 pub trait Cipher {
