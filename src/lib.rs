@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn s1c1_convert_hex_to_base64() -> Result<()> {
-        let res = Data::from_hex_str("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")?
+        let res = Data::from_hex("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")?
             .base64();
 
         assert_eq!(

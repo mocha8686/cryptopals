@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn s1c3_single_byte_xor_cipher() -> Result<()> {
-        let data = Data::from_hex_str(
+        let data = Data::from_hex(
             "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736",
         )?;
         let (key, res) = single_byte_xor(&data);
@@ -108,7 +108,7 @@ mod tests {
         let text = include_str!("../../data/4.txt");
         let (key, data) = text
             .split_ascii_whitespace()
-            .flat_map(Data::from_hex_str)
+            .flat_map(Data::from_hex)
             .map(|data| single_byte_xor(&data))
             .max_by_key(|(_, data)| score(data.iter()))
             .unwrap();
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn s1c6_break_repeating_key_xor() -> Result<()> {
         let text = include_str!("../../data/6.txt").replace('\n', "");
-        let data = Data::from_base64_str(&text)?;
+        let data = Data::from_base64(&text)?;
         let (key, res) = repeating_key_xor(&data);
 
         assert_eq!("Terminator X: Bring the noise", key.to_string());

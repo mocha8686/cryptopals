@@ -9,10 +9,6 @@ impl Data {
         Ok(res)
     }
 
-    pub fn from_hex_str(input: &str) -> Result<Self> {
-        Self::from_hex(input.as_bytes())
-    }
-
     #[must_use]
     pub fn hex(&self) -> String {
         hex::encode(self)
@@ -26,7 +22,7 @@ mod tests {
     #[test]
     fn is_invertible() -> Result<()> {
         let s = "hello, world!";
-        let data = Data::from_hex_str(&Data::from(s.as_bytes()).hex())?;
+        let data = Data::from_hex(&Data::from(s.as_bytes()).hex())?;
         assert_eq!(s, data);
         Ok(())
     }

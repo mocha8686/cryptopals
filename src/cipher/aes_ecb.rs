@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn s1c7_aes_in_ecb_mode() -> Result<()> {
         let text = include_str!("../../data/7.txt").replace('\n', "");
-        let data = Data::from_base64_str(&text)?;
+        let data = Data::from_base64(&text)?;
         let mut cipher = AesEcb::new("YELLOW SUBMARINE", true)?;
         let res = data.decode(&mut cipher)?;
 
@@ -106,7 +106,7 @@ mod tests {
         let text = include_str!("../../data/8.txt");
         let res = text
             .split('\n')
-            .flat_map(Data::from_hex_str)
+            .flat_map(Data::from_hex)
             .max_by_key(|d| score(d))
             .unwrap();
 
