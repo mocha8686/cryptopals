@@ -40,7 +40,7 @@ impl Cipher for AesCbc {
             cipher: self.cipher.clone(),
             pad: false,
         };
-        let decoded = data.decode(&mut ecb)?;
+        let decoded = ecb.decode(data)?;
 
         let mut xor = self.iv.to_vec();
         xor.extend(data.iter().copied().dropping_back(16));
@@ -77,7 +77,7 @@ mod tests {
         let text = include_str!("../../data/10.txt").replace('\n', "");
         let data = Data::from_base64(text)?;
         let mut cipher = AesCbc::new("YELLOW SUBMARINE", [0u8; 16])?;
-        let res = data.decode(&mut cipher)?;
+        let res = cipher.decode(&data)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());
 

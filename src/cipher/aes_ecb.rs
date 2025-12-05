@@ -95,7 +95,7 @@ mod tests {
         let text = include_str!("../../data/7.txt").replace('\n', "");
         let data = Data::from_base64(&text)?;
         let mut cipher = AesEcb::new("YELLOW SUBMARINE", true)?;
-        let res = data.decode(&mut cipher)?;
+        let res = cipher.decode(&data)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());
 
