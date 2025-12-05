@@ -16,7 +16,7 @@ impl Data {
     #[must_use]
     pub fn hamming_distance(&self, other: &Self) -> Option<u32> {
         if self.len() == other.len() {
-            let res = hamming_distance(self.iter(), other.iter());
+            let res = hamming_distance(self, other);
             Some(res)
         } else {
             None

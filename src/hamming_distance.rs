@@ -1,12 +1,6 @@
-pub fn hamming_distance<'l, 'r, L, R, T, U>(lhs: L, rhs: R) -> u32
-where
-    T: Into<&'l u8>,
-    U: Into<&'r u8>,
-    L: Iterator<Item = T>,
-    R: Iterator<Item = U>,
-{
-    lhs.map(Into::into)
-        .zip(rhs.map(Into::into))
+pub fn hamming_distance(lhs: &[u8], rhs: &[u8]) -> u32 {
+    lhs.iter()
+        .zip(rhs.iter())
         .map(|(a, b)| a ^ b)
         .map(u8::count_ones)
         .sum()
@@ -18,8 +12,8 @@ mod tests {
 
     #[test]
     fn hamming_distance_works() {
-        let lhs = "this is a test".as_bytes().iter();
-        let rhs = "wokka wokka!!!".as_bytes().iter();
+        let lhs = "this is a test".as_bytes();
+        let rhs = "wokka wokka!!!".as_bytes();
         let res = hamming_distance(lhs, rhs);
         assert_eq!(37, res);
     }

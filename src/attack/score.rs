@@ -30,13 +30,10 @@ static FREQUENCIES: phf::Map<char, i32> = phf_map! {
     'z' =>    74,
 };
 
-pub fn score<'a, I, T>(bytes: I) -> i32
-where
-    T: Into<&'a u8>,
-    I: Iterator<Item = T>,
-{
+pub fn score(bytes: &[u8]) -> i32 {
     bytes
-        .map(|b| b.into().to_ascii_lowercase())
+        .iter()
+        .map(u8::to_ascii_lowercase)
         .map(|b| FREQUENCIES.get(&b.into()).unwrap_or(&-1000))
         .sum()
 }

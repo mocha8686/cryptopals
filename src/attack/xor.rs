@@ -6,7 +6,7 @@ use crate::{Data, attack::score::score, hamming_distance::hamming_distance};
 pub fn single_byte_xor(data: &Data) -> (u8, Data) {
     let Some(res) = (u8::MIN..=u8::MAX)
         .map(|b| (b, data ^ b))
-        .max_by_key(|(_, data)| score(data.iter()))
+        .max_by_key(|(_, data)| score(data))
     else {
         unreachable!()
     };
@@ -37,8 +37,7 @@ fn guess_keysize(data: &Data) -> u32 {
         let (score, count, _) =
             data.chunks_exact(*keysize as usize)
                 .fold((0, 0, None), |(acc, n, prev), chunk| {
-                    let res =
-                        prev.map_or(0, |prev: &[u8]| hamming_distance(prev.iter(), chunk.iter()));
+                    let res = prev.map_or(0, |prev: &[u8]| hamming_distance(prev, chunk));
                     (acc + res, n + 1, Some(chunk))
                 });
         score * 100 / count / *keysize
@@ -105,7 +104,7 @@ mod tests {
             .split_ascii_whitespace()
             .flat_map(Data::from_hex)
             .map(|data| single_byte_xor(&data))
-            .max_by_key(|(_, data)| score(data.iter()))
+            .max_by_key(|(_, data)| score(data))
             .unwrap();
 
         assert_eq!('5', key.into());
