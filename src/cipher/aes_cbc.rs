@@ -30,16 +30,18 @@ impl AesCbc {
             actual: iv.len(),
         })?;
 
-        Ok(Self { cipher, iv })
+        Ok(Self::init(cipher, iv))
+    }
+
+    #[must_use]
+    pub fn init(cipher: Aes128, iv: [u8; 16]) -> Self {
+        Self { cipher, iv }
     }
 }
 
 impl Cipher for AesCbc {
     fn decode(&mut self, data: &Data) -> Result<Data> {
-        let mut ecb = AesEcb {
-            cipher: self.cipher.clone(),
-            pad: false,
-        };
+        let mut ecb = AesEcb::init(self.cipher.clone(), false);
         let decoded = ecb.decode(data)?;
 
         let mut xor = self.iv.to_vec();

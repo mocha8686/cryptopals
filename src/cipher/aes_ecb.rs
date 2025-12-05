@@ -22,7 +22,12 @@ impl AesEcb {
             actual: key.len(),
         })?;
 
-        Ok(Self { cipher, pad })
+        Ok(Self::init(cipher, pad))
+    }
+
+    #[must_use]
+    pub fn init(cipher: Aes128, pad: bool) -> Self {
+        Self { cipher, pad }
     }
 }
 
