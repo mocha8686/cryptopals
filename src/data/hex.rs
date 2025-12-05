@@ -3,7 +3,7 @@ use crate::{Result, error::ParseError};
 use super::Data;
 
 impl Data {
-    pub fn from_hex<T: AsRef<[u8]>>(input: T) -> Result<Self> {
+    pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = hex::decode(input).map_err(ParseError::from)?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)

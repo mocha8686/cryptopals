@@ -10,7 +10,7 @@ use super::Data;
 const ENGINE: GeneralPurpose = STANDARD;
 
 impl Data {
-    pub fn from_base64<T: AsRef<[u8]>>(input: T) -> Result<Self> {
+    pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = ENGINE.decode(input).map_err(ParseError::from)?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)
@@ -34,3 +34,4 @@ mod tests {
         Ok(())
     }
 }
+
