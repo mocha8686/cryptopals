@@ -8,6 +8,7 @@ use crate::{Data, Error, Result, cipher::aes_ecb::AesEcb, error::InvalidLengthTy
 
 use super::Cipher;
 
+#[derive(Debug, Clone)]
 pub struct AesCbc {
     cipher: Aes128,
     iv: [u8; 16],
