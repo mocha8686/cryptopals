@@ -1,12 +1,14 @@
 #![allow(clippy::missing_errors_doc, reason = "ignore docs for now")]
 
 pub mod attack;
+pub mod blackbox;
 pub mod cipher;
 pub mod data;
 pub mod error;
 pub mod hamming_distance;
 pub mod pad;
 
+pub use cipher::{AesCbc, AesEcb};
 pub use data::Data;
 pub use error::{Error, Result};
 
