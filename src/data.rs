@@ -3,26 +3,14 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use crate::hamming_distance::hamming_distance;
-
 pub mod base64;
+pub mod hamming_distance;
 pub mod hex;
+pub mod pad;
 pub mod xor;
 
 #[derive(Debug, Clone)]
 pub struct Data(pub(crate) Box<[u8]>);
-
-impl Data {
-    #[must_use]
-    pub fn hamming_distance(&self, other: &Self) -> Option<u32> {
-        if self.len() == other.len() {
-            let res = hamming_distance(self, other);
-            Some(res)
-        } else {
-            None
-        }
-    }
-}
 
 impl<T: Into<Box<[u8]>>> From<T> for Data {
     fn from(value: T) -> Self {

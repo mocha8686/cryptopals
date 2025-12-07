@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{Data, attack::score::score, hamming_distance::hamming_distance};
+use crate::{Data, attack::score::score};
 
 #[must_use]
 pub fn single_byte_xor(data: &Data) -> (u8, Data) {
@@ -37,7 +37,12 @@ fn guess_keysize(data: &Data) -> u32 {
         let (score, count, _) =
             data.chunks_exact(*keysize as usize)
                 .fold((0, 0, None), |(acc, n, prev), chunk| {
-                    let res = prev.map_or(0, |prev: &[u8]| hamming_distance(prev, chunk));
+                    let res = prev.map_or(0, |prev: &[u8]| {
+                        let prev = Data::from(prev);
+                        let chunk = Data::from(chunk);
+                        prev.hamming_distance(&chunk)
+                            .expect("chunks should be equally sized")
+                    });
                     (acc + res, n + 1, Some(chunk))
                 });
         score * 100 / count / *keysize
