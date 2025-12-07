@@ -68,7 +68,8 @@ impl BitXor<u8> for Data {
 
 #[cfg(test)]
 mod tests {
-    use crate::Result;
+    use miette::Result;
+    use pretty_assertions::assert_eq;
 
     use super::*;
 

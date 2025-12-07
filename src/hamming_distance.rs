@@ -8,6 +8,8 @@ pub fn hamming_distance(lhs: &[u8], rhs: &[u8]) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

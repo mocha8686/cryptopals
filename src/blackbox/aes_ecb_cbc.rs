@@ -82,10 +82,12 @@ pub fn detect_aes_mode(blackbox: &mut dyn Blackbox) -> Result<EcbOrCbc> {
 
 #[cfg(test)]
 mod tests {
+    use miette::Result;
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     fn test_mode(mode: EcbOrCbc) -> Result<()> {
-        dbg!(mode);
         let mut blackbox = AesEcbOrCbc::new(Some(mode));
         let res = detect_aes_mode(&mut blackbox)?;
         assert_eq!(mode, res);

@@ -24,6 +24,9 @@ impl Data {
 
 #[cfg(test)]
 mod tests {
+    use miette::Result;
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

@@ -14,6 +14,9 @@ pub use error::{Error, Result};
 
 #[cfg(test)]
 mod tests {
+    use miette::Result;
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]
