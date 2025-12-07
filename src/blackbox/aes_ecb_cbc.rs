@@ -1,9 +1,11 @@
-use crate::{AesCbc, AesEcb, Data, Result, cipher::Cipher};
+use crate::{
+    AesCbc, AesEcb, Data, Result,
+    cipher::{Cipher, aes_ecb},
+};
 use aes::{
     Aes128,
     cipher::{KeyInit, generic_array::GenericArray},
 };
-use itertools::Itertools;
 use rand::Rng;
 
 use super::Blackbox;
@@ -69,15 +71,7 @@ pub fn detect_aes_mode(blackbox: &mut dyn Blackbox) -> Result<EcbOrCbc> {
     let data = Data::from([b'A'; BLOCKSIZE * 3]);
     let res = blackbox.process(&data)?;
 
-    let mode = if res
-        .chunks(BLOCKSIZE)
-        .inspect(|c| {
-            dbg!(hex::encode(c));
-        })
-        .counts()
-        .into_values()
-        .any(|v| v > 1)
-    {
+    let mode = if aes_ecb::score(&res) > 0 {
         EcbOrCbc::Ecb
     } else {
         EcbOrCbc::Cbc
