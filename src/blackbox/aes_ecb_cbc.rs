@@ -31,6 +31,12 @@ impl AesEcbOrCbc {
     }
 }
 
+impl Default for AesEcbOrCbc {
+    fn default() -> Self {
+        Self::new(None)
+    }
+}
+
 impl Blackbox for AesEcbOrCbc {
     fn process(&mut self, data: &Data) -> Result<Data> {
         let mut rng = rand::rng();
