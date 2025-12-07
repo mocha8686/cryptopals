@@ -45,8 +45,12 @@ impl Cipher for AesCbc {
         let mut ecb = AesEcb::init(self.cipher.clone(), false);
         let decoded = ecb.decode(data)?;
 
-        let mut xor = self.iv.to_vec();
-        xor.extend(data.iter().copied().dropping_back(16));
+        let xor: Box<[u8]> = self
+            .iv
+            .iter()
+            .chain(data.iter().dropping_back(16))
+            .copied()
+            .collect();
         let xor = Data::from(xor);
 
         let res = decoded ^ xor;

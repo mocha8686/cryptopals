@@ -17,8 +17,11 @@ pub fn pad(data: &Data, blocksize: u8) -> Data {
         padding as u8
     };
 
-    let mut bytes = data.to_vec();
-    bytes.extend((0..padding).map(|_| padding));
+    let bytes: Box<[u8]> = data
+        .iter()
+        .copied()
+        .chain((0..padding).map(|_| padding))
+        .collect();
     Data::from(bytes)
 }
 
