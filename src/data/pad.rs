@@ -37,9 +37,9 @@ impl Data {
             return Err(Error::InvalidPadding(padding));
         }
 
-        let Some(last) = self.get(len - padding as usize..) else {
-            return Err(Error::InvalidPadding(padding));
-        };
+        let last = self
+            .get(len - padding as usize..)
+            .ok_or(Error::InvalidPadding(padding))?;
 
         if !last.iter().all_equal() {
             return Err(Error::InvalidPadding(padding));
