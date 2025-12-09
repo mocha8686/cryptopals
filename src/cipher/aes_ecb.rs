@@ -38,8 +38,17 @@ impl AesEcb {
 impl Cipher for AesEcb {
     fn decode(&mut self, data: &Data) -> Result<Data> {
         let bytes = data
-            .chunks_exact(BLOCKSIZE_USIZE)
-            .filter_map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
+            .chunks(BLOCKSIZE_USIZE)
+            .map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
+            .map(|o| {
+                o.ok_or(Error::InvalidLength {
+                    kind: InvalidLengthType::Block,
+                    expected: BLOCKSIZE_USIZE,
+                    actual: data.len() / BLOCKSIZE_USIZE,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
             .map(GenericArray::from)
             .flat_map(|mut block| {
                 self.cipher.decrypt_block_mut(&mut block);
@@ -59,8 +68,17 @@ impl Cipher for AesEcb {
         let data = if self.pad { &data.pad(BLOCKSIZE) } else { data };
 
         let bytes = data
-            .chunks_exact(BLOCKSIZE_USIZE)
-            .filter_map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
+            .chunks(BLOCKSIZE_USIZE)
+            .map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
+            .map(|o| {
+                o.ok_or(Error::InvalidLength {
+                    kind: InvalidLengthType::Block,
+                    expected: BLOCKSIZE_USIZE,
+                    actual: data.len() / BLOCKSIZE_USIZE,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
             .map(GenericArray::from)
             .flat_map(|mut block| {
                 self.cipher.encrypt_block_mut(&mut block);
