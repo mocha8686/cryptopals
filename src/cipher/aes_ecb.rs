@@ -10,8 +10,8 @@ use super::Cipher;
 
 #[derive(Debug, Clone)]
 pub struct AesEcb {
-    pub(super) cipher: Aes128,
-    pub(super) pad: bool,
+    cipher: Aes128,
+    pad: bool,
 }
 
 impl AesEcb {
