@@ -56,6 +56,12 @@ impl Cipher for AesEcb {
     }
 
     fn encode(&mut self, data: &Data) -> Result<Data> {
+        let data = if self.pad {
+            &data.pad(BLOCKSIZE)
+        } else {
+            data
+        };
+
         let bytes = data
             .iter()
             .copied()
@@ -69,12 +75,7 @@ impl Cipher for AesEcb {
             })
             .collect_vec();
 
-        if self.pad {
-            let data = Data::from(bytes).pad(16);
-            Ok(data)
-        } else {
-            Ok(Data::from(bytes))
-        }
+        Ok(Data::from(bytes))
     }
 }
 
