@@ -56,11 +56,7 @@ impl Cipher for AesEcb {
     }
 
     fn encode(&mut self, data: &Data) -> Result<Data> {
-        let data = if self.pad {
-            &data.pad(BLOCKSIZE)
-        } else {
-            data
-        };
+        let data = if self.pad { &data.pad(BLOCKSIZE) } else { data };
 
         let bytes = data
             .chunks_exact(BLOCKSIZE_USIZE)
