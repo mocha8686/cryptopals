@@ -4,10 +4,7 @@ impl Data {
     #[must_use]
     pub fn hamming_distance(&self, other: &Self) -> Option<u32> {
         if self.len() == other.len() {
-            let res = (self ^ other)
-                .iter()
-                .map(|b| b.count_ones())
-                .sum();
+            let res = (self ^ other).iter().map(|b| b.count_ones()).sum();
             Some(res)
         } else {
             None

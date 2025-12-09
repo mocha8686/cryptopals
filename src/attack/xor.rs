@@ -32,7 +32,6 @@ pub fn repeating_key_xor(data: &Data) -> (Data, Data) {
 
 fn guess_keysize(data: &Data) -> u32 {
     const MAX_KEYSIZE: u32 = 40;
-
     let Some(res) = (2u32..=MAX_KEYSIZE).min_by_key(|keysize| {
         let (score, count, _) =
             data.chunks_exact(*keysize as usize)
