@@ -116,7 +116,9 @@ mod tests {
         let text = include_str!("../../data/8.txt");
         let res = text
             .split('\n')
-            .flat_map(Data::from_hex)
+            .map(Data::from_hex)
+            .collect::<crate::Result<Vec<_>>>()?
+            .into_iter()
             .max_by_key(|d| score(d))
             .unwrap();
 
