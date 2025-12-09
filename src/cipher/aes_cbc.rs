@@ -8,10 +8,13 @@ use crate::{Data, Error, Result, cipher::aes_ecb::AesEcb, error::InvalidLengthTy
 
 use super::Cipher;
 
+const BLOCKSIZE: u8 = 16;
+const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
+
 #[derive(Debug, Clone)]
 pub struct AesCbc {
     cipher: Aes128,
-    iv: [u8; 16],
+    iv: [u8; BLOCKSIZE_USIZE],
 }
 
 impl AesCbc {
@@ -21,13 +24,13 @@ impl AesCbc {
 
         let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
             kind: InvalidLengthType::Key,
-            expected: 16,
+            expected: BLOCKSIZE_USIZE,
             actual: key.len(),
         })?;
 
         let iv = iv.try_into().map_err(|_| Error::InvalidLength {
             kind: InvalidLengthType::IV,
-            expected: 16,
+            expected: BLOCKSIZE_USIZE,
             actual: iv.len(),
         })?;
 
@@ -35,7 +38,7 @@ impl AesCbc {
     }
 
     #[must_use]
-    pub fn init(cipher: Aes128, iv: [u8; 16]) -> Self {
+    pub fn init(cipher: Aes128, iv: [u8; BLOCKSIZE_USIZE]) -> Self {
         Self { cipher, iv }
     }
 }
@@ -48,7 +51,7 @@ impl Cipher for AesCbc {
         let xor: Box<[u8]> = self
             .iv
             .iter()
-            .chain(data.iter().dropping_back(16))
+            .chain(data.iter().dropping_back(BLOCKSIZE_USIZE))
             .copied()
             .collect();
         let xor = Data::from(xor);
@@ -59,7 +62,7 @@ impl Cipher for AesCbc {
     }
 
     fn encode(&mut self, data: &Data) -> Result<Data> {
-        let (_, bytes) = data.pad(16).chunks(16).fold(
+        let (_, bytes) = data.pad(BLOCKSIZE).chunks(BLOCKSIZE_USIZE).fold(
             (Data::from(self.iv), vec![]),
             |(prev, mut acc): (Data, Vec<u8>), data| {
                 let data = Data::from(data);
@@ -86,7 +89,7 @@ mod tests {
     fn s2c10_implement_cbc_mode() -> Result<()> {
         let text = include_str!("../../data/10.txt").replace('\n', "");
         let data = Data::from_base64(text)?;
-        let mut cipher = AesCbc::new("YELLOW SUBMARINE", [0u8; 16])?;
+        let mut cipher = AesCbc::new("YELLOW SUBMARINE", [0u8; BLOCKSIZE_USIZE])?;
         let res = cipher.decode(&data)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());

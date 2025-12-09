@@ -8,6 +8,9 @@ use crate::{Data, Error, Result, error::InvalidLengthType};
 
 use super::Cipher;
 
+const BLOCKSIZE: u8 = 16;
+const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
+
 #[derive(Debug, Clone)]
 pub struct AesEcb {
     cipher: Aes128,
@@ -19,7 +22,7 @@ impl AesEcb {
         let key = key.as_ref();
         let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
             kind: InvalidLengthType::Key,
-            expected: 16,
+            expected: BLOCKSIZE_USIZE,
             actual: key.len(),
         })?;
 
@@ -35,11 +38,8 @@ impl AesEcb {
 impl Cipher for AesEcb {
     fn decode(&mut self, data: &Data) -> Result<Data> {
         let bytes = data
-            .iter()
-            .copied()
-            .chunks(16)
-            .into_iter()
-            .filter_map(itertools::Itertools::collect_array::<16>)
+            .chunks_exact(BLOCKSIZE_USIZE)
+            .filter_map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
             .map(GenericArray::from)
             .flat_map(|mut block| {
                 self.cipher.decrypt_block_mut(&mut block);
@@ -63,11 +63,8 @@ impl Cipher for AesEcb {
         };
 
         let bytes = data
-            .iter()
-            .copied()
-            .chunks(16)
-            .into_iter()
-            .filter_map(itertools::Itertools::collect_array::<16>)
+            .chunks_exact(BLOCKSIZE_USIZE)
+            .filter_map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
             .map(GenericArray::from)
             .flat_map(|mut block| {
                 self.cipher.encrypt_block_mut(&mut block);
@@ -86,7 +83,7 @@ impl Cipher for AesEcb {
 )]
 pub fn score(bytes: &[u8]) -> u32 {
     bytes
-        .chunks(16)
+        .chunks_exact(BLOCKSIZE_USIZE)
         .counts()
         .into_values()
         .map(|v| v.saturating_sub(1) as u32)
