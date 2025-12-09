@@ -23,8 +23,8 @@ mod tests {
 
     #[test]
     fn hamming_distance_works() {
-        let lhs = Data::from(b"this is a test".as_slice());
-        let rhs = Data::from(b"wokka wokka!!!".as_slice());
+        let lhs = Data::from("this is a test".as_bytes());
+        let rhs = Data::from("wokka wokka!!!".as_bytes());
         let res = lhs.hamming_distance(&rhs);
         assert_eq!(Some(37), res);
     }
