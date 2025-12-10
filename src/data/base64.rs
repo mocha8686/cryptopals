@@ -1,9 +1,13 @@
 use base64::{
-    Engine,
+    DecodeError, Engine,
     engine::{GeneralPurpose, general_purpose::STANDARD},
 };
+use itertools::Itertools;
 
-use crate::{Result, error::ParseError};
+use crate::{
+    Result,
+    error::{INPUT_CHUNK_SIZE, ParseError},
+};
 
 use super::Data;
 
@@ -11,7 +15,19 @@ const ENGINE: GeneralPurpose = STANDARD;
 
 impl Data {
     pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
-        let bytes = ENGINE.decode(input).map_err(ParseError::from)?;
+        let bytes = ENGINE.decode(&input).map_err(|e| ParseError::Base64 {
+            input: input
+                .as_ref()
+                .chunks(INPUT_CHUNK_SIZE)
+                .map(String::from_utf8_lossy)
+                .join("\n"),
+            label: match e {
+                DecodeError::InvalidByte(i, _) | DecodeError::InvalidLastSymbol(i, _) => Some(i),
+                _ => None,
+            }
+            .map(|i| i + (i / INPUT_CHUNK_SIZE)),
+            source: e,
+        })?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)
     }

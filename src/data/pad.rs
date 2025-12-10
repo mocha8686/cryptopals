@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{Data, Error, Result};
+use crate::{Data, Result, error::PaddingError};
 
 impl Data {
     #[expect(
@@ -33,16 +33,23 @@ impl Data {
 
         let len = self.len();
 
-        if self.get(len - 1).is_none_or(|b| *b != padding) {
-            return Err(Error::InvalidPadding(padding));
-        }
-
         let last = self
-            .get(len - padding as usize..)
-            .ok_or(Error::InvalidPadding(padding))?;
+            .get(len.wrapping_sub(padding as usize)..)
+            .ok_or(PaddingError::InputTooShort { byte: padding, len })?;
 
-        if !last.iter().all_equal() {
-            return Err(Error::InvalidPadding(padding));
+        if !last.iter().all(|b| *b == padding) {
+            let len2 = len * 2;
+            let padding2 = padding as usize * 2;
+
+            let start = len2 - padding2;
+            let length = padding2;
+
+            return Err(PaddingError::InvalidPadding {
+                byte: padding,
+                input: self.hex(),
+                label: (start, length),
+            }
+            .into());
         }
 
         let bytes = self
@@ -58,12 +65,36 @@ impl Data {
 mod tests {
     use pretty_assertions::assert_eq;
 
+    use crate::Error;
+
     use super::*;
 
     #[test]
     fn pad_equal_to_blocksize() {
         let res = Data::from("hello".as_bytes()).pad(5);
         assert_eq!("hello\x05\x05\x05\x05\x05", res);
+    }
+
+    #[test]
+    fn unpad_errors() {
+        let too_short = Data::from("hello\x10".as_bytes()).unpad();
+        assert_eq!(
+            Err(Error::PaddingError(PaddingError::InputTooShort {
+                byte: 0x10,
+                len: 6
+            })),
+            too_short
+        );
+
+        let invalid_padding = Data::from("hello, world!\x04\x04\x04".as_bytes()).unpad();
+        assert_eq!(
+            Err(Error::PaddingError(PaddingError::InvalidPadding {
+                byte: 0x04,
+                input: "68656c6c6f2c20776f726c6421040404".into(),
+                label: (24, 8)
+            })),
+            invalid_padding
+        );
     }
 
     #[test]
