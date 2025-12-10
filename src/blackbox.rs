@@ -1,8 +1,10 @@
-use crate::{Data, Result};
+use crate::Data;
 
 pub mod aes_ecb_cbc;
 pub mod aes_ecb_prefix;
 
 pub trait Blackbox {
-    fn process(&mut self, data: &Data) -> Result<Data>;
+    type Error;
+
+    fn process(&mut self, data: &Data) -> Result<Data, Self::Error>;
 }

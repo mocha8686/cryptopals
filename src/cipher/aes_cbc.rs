@@ -44,6 +44,8 @@ impl AesCbc {
 }
 
 impl Cipher for AesCbc {
+    type Error = Error;
+
     fn decode(&mut self, data: &Data) -> Result<Data> {
         let mut ecb = AesEcb::init(self.cipher.clone(), false);
         let decoded = ecb.decode(data)?;
@@ -73,8 +75,8 @@ impl Cipher for AesCbc {
                 (data, acc)
             },
         );
-        let data = Data::from(bytes);
-        Ok(data)
+
+        Ok(Data::from(bytes))
     }
 }
 

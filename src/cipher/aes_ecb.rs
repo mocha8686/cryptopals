@@ -36,6 +36,8 @@ impl AesEcb {
 }
 
 impl Cipher for AesEcb {
+    type Error = Error;
+
     fn decode(&mut self, data: &Data) -> Result<Data> {
         let bytes = data
             .chunks(BLOCKSIZE_USIZE)

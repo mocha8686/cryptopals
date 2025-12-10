@@ -40,9 +40,11 @@ impl Default for AesEcbOrCbc {
 }
 
 impl Blackbox for AesEcbOrCbc {
+    type Error = crate::Error;
+
     fn process(&mut self, data: &Data) -> Result<Data> {
         let mut rng = rand::rng();
-        let mut cipher: Box<dyn Cipher> = if self.mode.is_some_and(|m| matches!(m, EcbOrCbc::Ecb))
+        let mut cipher: Box<dyn Cipher<Error = crate::Error>> = if self.mode.is_some_and(|m| matches!(m, EcbOrCbc::Ecb))
             || (self.mode.is_none() && rng.random())
         {
             let cipher = AesEcb::init(self.cipher.clone(), true);
@@ -66,7 +68,7 @@ impl Blackbox for AesEcbOrCbc {
     }
 }
 
-pub fn detect_aes_mode(blackbox: &mut dyn Blackbox) -> Result<EcbOrCbc> {
+pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Result<EcbOrCbc> {
     const BLOCKSIZE: usize = 16;
     let data = Data::from([b'A'; BLOCKSIZE * 3]);
     let res = blackbox.process(&data)?;
