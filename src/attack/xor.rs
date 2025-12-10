@@ -112,7 +112,7 @@ mod tests {
             .into_iter()
             .map(|data| single_byte_xor(&data))
             .max_by_key(|(_, data)| score(data))
-            .unwrap();
+            .expect("data/4.txt should not be empty");
 
         assert_eq!('5', key.into());
         assert_eq!("Now that the party is jumping\n", data);
