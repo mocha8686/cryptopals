@@ -1,9 +1,17 @@
-#![allow(clippy::missing_errors_doc, reason = "ignore docs for now")]
+//! A collection of tools for completing the [cryptopals crypto challenges](https://cryptopals.com).
+//!
+//! Functionality is split into modules, grouped by general usage:
+//! - [`cipher`] – Working with ciphers such as XOR, AES-128 in ECB or CBC mode, and others
+//! - [`blackbox`] – Mock implementations of real-life systems for testing attacks
+//! - [`error`] – Error types
+//! - [`attack`] – Attacks on different [ciphers][cipher] and [blackboxes][blackbox]
+
+#![warn(missing_docs, clippy::missing_docs_in_private_items)]
 
 pub mod attack;
 pub mod blackbox;
 pub mod cipher;
-pub mod data;
+mod data;
 pub mod error;
 
 pub use cipher::{AesCbc, AesEcb};
