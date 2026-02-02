@@ -1,5 +1,10 @@
 use phf::phf_map;
 
+/// Frequency map of english letters (case-insensitive).
+///
+/// Data is sourced from [Cryptological Mathematics](https://web.archive.org/web/20080708193159/http://pages.central.edu/emp/LintonT/classes/spring01/cryptography/letterfreq.html).
+///
+/// Spaces are the most common character in many plaintexts, so they are given a very high score.
 static EN_FREQUENCIES: phf::Map<u8, i32> = phf_map! {
     b' ' => 20000,
     b'e' => 12700,
@@ -30,6 +35,13 @@ static EN_FREQUENCIES: phf::Map<u8, i32> = phf_map! {
     b'z' =>    74,
 };
 
+/// Score a plaintext based on the character frequency of letters in English texts.
+///
+/// Data is sourced from [Cryptological Mathematics](https://web.archive.org/web/20080708193159/http://pages.central.edu/emp/LintonT/classes/spring01/cryptography/letterfreq.html).
+///
+/// If a character in the plaintext doesn't appear in the frequency map, the score will be
+/// penalized minorly. The penalty is small to allow for punctuation to be marked as plaintext,
+/// but if the plaintext is gibberish, then the penalty will add up regardless.
 pub fn en_frequency_score(bytes: &[u8]) -> i32 {
     bytes
         .iter()
