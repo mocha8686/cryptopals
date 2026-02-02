@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{Data, attack::score::en_frequency_score};
+use crate::{Data, score::en_frequency_score};
 
 #[must_use]
 pub fn single_byte_xor(data: &Data) -> (u8, Data) {

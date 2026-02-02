@@ -26,6 +26,7 @@ mod data;
 
 /// Error types.
 pub mod error;
+pub mod score;
 
 pub use cipher::{AesCbc, AesEcb};
 pub use data::Data;

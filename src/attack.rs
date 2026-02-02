@@ -1,5 +1,3 @@
-/// Functions for scoring a piece of plaintext based on different metrics.
-pub mod score;
 
 /// Attacks on [repeating key XOR ciphers][crate::Data::xor()].
 ///
