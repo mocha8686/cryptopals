@@ -1,6 +1,6 @@
 use phf::phf_map;
 
-static FREQUENCIES: phf::Map<u8, i32> = phf_map! {
+static EN_FREQUENCIES: phf::Map<u8, i32> = phf_map! {
     b' ' => 20000,
     b'e' => 12700,
     b't' =>  9100,
@@ -30,10 +30,10 @@ static FREQUENCIES: phf::Map<u8, i32> = phf_map! {
     b'z' =>    74,
 };
 
-pub fn score(bytes: &[u8]) -> i32 {
+pub fn en_frequency_score(bytes: &[u8]) -> i32 {
     bytes
         .iter()
         .map(u8::to_ascii_lowercase)
-        .map(|b| FREQUENCIES.get(&b).unwrap_or(&-1000))
+        .map(|b| EN_FREQUENCIES.get(&b).unwrap_or(&-1000))
         .sum()
 }

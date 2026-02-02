@@ -1,12 +1,12 @@
 use itertools::Itertools;
 
-use crate::{Data, attack::score::score};
+use crate::{Data, attack::score::en_frequency_score};
 
 #[must_use]
 pub fn single_byte_xor(data: &Data) -> (u8, Data) {
     let Some(res) = (u8::MIN..=u8::MAX)
         .map(|b| (b, data ^ b))
-        .max_by_key(|(_, data)| score(data))
+        .max_by_key(|(_, data)| en_frequency_score(data))
     else {
         unreachable!()
     };
@@ -111,7 +111,7 @@ mod tests {
             .collect::<crate::Result<Vec<_>>>()?
             .into_iter()
             .map(|data| single_byte_xor(&data))
-            .max_by_key(|(_, data)| score(data))
+            .max_by_key(|(_, data)| en_frequency_score(data))
             .expect("data/4.txt should not be empty");
 
         assert_eq!('5', key.into());
