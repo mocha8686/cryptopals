@@ -9,6 +9,6 @@ pub use aes_ecb::AesEcb;
 pub trait Cipher {
     type Error;
 
-    fn decode(&mut self, data: &Data) -> Result<Data, Self::Error>;
-    fn encode(&mut self, data: &Data) -> Result<Data, Self::Error>;
+    fn decrypt(&mut self, data: &Data) -> Result<Data, Self::Error>;
+    fn encrypt(&mut self, data: &Data) -> Result<Data, Self::Error>;
 }

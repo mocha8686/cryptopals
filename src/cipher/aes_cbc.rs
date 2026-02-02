@@ -46,9 +46,9 @@ impl AesCbc {
 impl Cipher for AesCbc {
     type Error = Error;
 
-    fn decode(&mut self, data: &Data) -> Result<Data> {
+    fn decrypt(&mut self, data: &Data) -> Result<Data> {
         let mut ecb = AesEcb::init(self.cipher.clone(), false);
-        let decoded = ecb.decode(data)?;
+        let decoded = ecb.decrypt(data)?;
 
         let xor: Box<[u8]> = self
             .iv
@@ -63,7 +63,7 @@ impl Cipher for AesCbc {
         Ok(res)
     }
 
-    fn encode(&mut self, data: &Data) -> Result<Data> {
+    fn encrypt(&mut self, data: &Data) -> Result<Data> {
         let (_, bytes) = data.pad(BLOCKSIZE).chunks(BLOCKSIZE_USIZE).fold(
             (Data::from(self.iv), vec![]),
             |(prev, mut acc): (Data, Vec<u8>), data| {
@@ -92,7 +92,7 @@ mod tests {
         let text = include_str!("../../data/10.txt").replace('\n', "");
         let data = Data::from_base64(text)?;
         let mut cipher = AesCbc::new("YELLOW SUBMARINE", [0u8; BLOCKSIZE_USIZE])?;
-        let res = cipher.decode(&data)?;
+        let res = cipher.decrypt(&data)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());
 

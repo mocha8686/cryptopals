@@ -38,7 +38,7 @@ impl AesEcb {
 impl Cipher for AesEcb {
     type Error = Error;
 
-    fn decode(&mut self, data: &Data) -> Result<Data> {
+    fn decrypt(&mut self, data: &Data) -> Result<Data> {
         let bytes = data
             .chunks(BLOCKSIZE_USIZE)
             .map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
@@ -65,7 +65,7 @@ impl Cipher for AesEcb {
         }
     }
 
-    fn encode(&mut self, data: &Data) -> Result<Data> {
+    fn encrypt(&mut self, data: &Data) -> Result<Data> {
         let data = if self.pad { &data.pad(BLOCKSIZE) } else { data };
 
         let bytes = data
@@ -116,7 +116,7 @@ mod tests {
         let text = include_str!("../../data/7.txt").replace('\n', "");
         let data = Data::from_base64(&text)?;
         let mut cipher = AesEcb::new("YELLOW SUBMARINE", true)?;
-        let res = cipher.decode(&data)?;
+        let res = cipher.decrypt(&data)?;
 
         assert_eq!(include_str!("../../data/funky.txt"), res.to_string());
 

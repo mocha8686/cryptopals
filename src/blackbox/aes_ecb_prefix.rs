@@ -37,6 +37,6 @@ impl Blackbox for AesEcbPrefix {
     fn process(&mut self, data: &Data) -> Result<Data> {
         let bytes: Box<[u8]> = data.iter().chain(UNKNOWN_STR.as_bytes()).copied().collect();
         let data = Data::from(bytes);
-        self.cipher.encode(&data)
+        self.cipher.encrypt(&data)
     }
 }

@@ -44,17 +44,18 @@ impl Blackbox for AesEcbOrCbc {
 
     fn process(&mut self, data: &Data) -> Result<Data> {
         let mut rng = rand::rng();
-        let mut cipher: Box<dyn Cipher<Error = crate::Error>> = if self.mode.is_some_and(|m| matches!(m, EcbOrCbc::Ecb))
-            || (self.mode.is_none() && rng.random())
-        {
-            let cipher = AesEcb::init(self.cipher.clone(), true);
-            Box::new(cipher)
-        } else {
-            let mut iv = [0u8; 16];
-            rng.fill(&mut iv);
-            let cipher = AesCbc::init(self.cipher.clone(), iv);
-            Box::new(cipher)
-        };
+        let mut cipher: Box<dyn Cipher<Error = crate::Error>> =
+            if self.mode.is_some_and(|m| matches!(m, EcbOrCbc::Ecb))
+                || (self.mode.is_none() && rng.random())
+            {
+                let cipher = AesEcb::init(self.cipher.clone(), true);
+                Box::new(cipher)
+            } else {
+                let mut iv = [0u8; 16];
+                rng.fill(&mut iv);
+                let cipher = AesCbc::init(self.cipher.clone(), iv);
+                Box::new(cipher)
+            };
 
         let prefix_count = rng.random_range(5..=10);
         let suffix_count = rng.random_range(5..=10);
@@ -63,7 +64,7 @@ impl Blackbox for AesEcbOrCbc {
         new_bytes[prefix_count..prefix_count + data.len()].copy_from_slice(data);
 
         let data = Data::from(new_bytes);
-        let data = cipher.encode(&data)?;
+        let data = cipher.encrypt(&data)?;
         Ok(data)
     }
 }
