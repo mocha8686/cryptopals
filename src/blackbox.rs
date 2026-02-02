@@ -1,3 +1,5 @@
+//! Mock implementations of certain vulnerable parts of real-world systems.
+
 use crate::Data;
 
 pub mod aes_ecb_cbc;

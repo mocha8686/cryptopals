@@ -1,3 +1,5 @@
+//! Error types.
+
 #![allow(
     unused_assignments,
     reason = "compiler doesn't play nicely with miette error reporting"

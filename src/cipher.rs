@@ -1,3 +1,5 @@
+//! Ciphers for encrypting and decrypting text.
+
 use crate::Data;
 
 pub mod aes_cbc;
