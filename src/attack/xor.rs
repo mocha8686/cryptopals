@@ -1,16 +1,23 @@
 //! Attacks on [repeating key XOR ciphers][crate::Data::xor()].
 //!
 //! Due to the nature of the repeating key, we are able to extract the entire plaintext and key
-//! given a sufficiently long ciphertext.
+//! given a sufficiently high ciphertext length to key length ratio.
 
 use itertools::Itertools;
 
 use crate::{Data, score::en_frequency_score};
 
+/// Decrypt a ciphertext encrypted using repeating-key XOR, where the length of the key is 1.
+///
+/// Assuming each byte has been XOR'ed with the same key byte, we perform a brute-force search
+/// through every possible [`u8`], taking the one with the highest [`en_frequency_score`].
+///
+/// The time complexity of this algorithm is `O(n)`, though note that since it performs the scoring
+/// for each [`u8`], the runtime has a coefficient of `2^8 == 256`.
 #[must_use]
-pub fn single_byte_xor(data: &Data) -> (u8, Data) {
+pub fn single_byte_xor(ciphertext: &Data) -> (u8, Data) {
     let Some(res) = (u8::MIN..=u8::MAX)
-        .map(|b| (b, data ^ b))
+        .map(|b| (b, ciphertext ^ b))
         .max_by_key(|(_, data)| en_frequency_score(data))
     else {
         unreachable!()
@@ -19,10 +26,25 @@ pub fn single_byte_xor(data: &Data) -> (u8, Data) {
     res
 }
 
+/// Decrypt a ciphertext encrypted using repeating-key XOR.
+///
+/// At a high level, the algorithm follows four steps:
+///   1. [Guess the keysize][guess_keysize] of the ciphertext, `keysize`.
+///   2. [Parittion the ciphertext][partition] into `keysize` blocks, such that, assuming the key
+///      is `keysize` bytes long, every byte in a single block has been XOR'ed with the same byte.
+///   3. Break each block using [`single_byte_xor`].
+///   4. [Unpartition the decrypted partitions][unpartition] and reconstruct the original
+///      plaintext.
+///
+/// [A more detailed walkthrough][walkthrough] of the algorithm is also available externally.
+///
+/// The time complexity of this algorithm is `O(n^2)`.
+///
+/// [walkthrough]: https://mocha8686.neocities.org/learning/cryptopals/set1/#break-repeating-key-xor
 #[must_use]
-pub fn repeating_key_xor(data: &Data) -> (Data, Data) {
-    let keysize = guess_keysize(data);
-    let partitions = partition(data, keysize);
+pub fn repeating_key_xor(ciphertext: &Data) -> (Data, Data) {
+    let keysize = guess_keysize(ciphertext);
+    let partitions = partition(ciphertext, keysize);
 
     let (key_bytes, partitions): (Vec<u8>, Vec<Data>) = partitions
         .into_iter()
@@ -35,20 +57,65 @@ pub fn repeating_key_xor(data: &Data) -> (Data, Data) {
     (key, data)
 }
 
-fn guess_keysize(data: &Data) -> u32 {
+/// Guess the keysize used to encrypt a certain ciphertext.
+///
+/// This algorithm uses the fact that XOR has [certain properties]:
+///
+///   1. [Associativity]
+///   2. [Commutativity]
+///   3. [Involution]
+///
+/// The algorithm guesses the keysize by finding the keysize in a certain range that produces the
+/// minimum [hamming distance][Data::hamming_distance()]. It accomplishes this in `O(n)` time.
+///
+/// # Explanation
+///
+/// Consider a plaintext encrypted under [repeating-key XOR][Data::xor()] using the key `meow`.
+/// Taking the first two ciphertext blocks of length 4 and XORing them, we see that
+///
+/// ```txt
+///  plaintext: ..........................
+///        key: meowmeowmeowmeowmeowmeowme
+/// ciphertext: qwertyuiopasdfghjklzxcvbnm
+///
+/// ciphertext[0..4] == plaintext[0..4] ^ "meow"
+/// ciphertext[4..8] == plaintext[4..8] ^ "meow"
+///
+/// ciphertext[0..4] ^ ciphertext[4..8]
+/// == plaintext[0..4] ^ "meow" ^ plaintext[4..8] ^ "meow"
+/// == plaintext[0..4] ^ plaintext[4..8] ^ "meow" ^ "meow"  (commutation and association)
+/// == plaintext[0..4] ^ plaintext[4..8]                    (involution)
+/// ```
+///
+/// When `blocksize == keysize`, the key cancels out, decreasing the total edits to the text.
+/// Otherwise, if `blocksize != keysize`, the key would be fragmented (`"meowm" ^ "eowme"`, for
+/// example), and would contribute to the total edits. Thus, minimizing edits (Hamming distance) is
+/// analogous to finding the correct `blocksize` for the key to cancel out, which will be the
+/// `keysize`.
+///
+/// [A more detailed explanation][explanation] is also available externally.
+///
+/// [certain properties]: https://en.wikipedia.org/wiki/Exclusive_or#Properties
+///
+/// [Associativity]: https://en.wikipedia.org/wiki/Associative_property
+/// [Commutativity]: https://en.wikipedia.org/wiki/Commutative_property
+/// [Involution]: https://en.wikipedia.org/wiki/Involution_(mathematics)
+/// [explanation]: https://mocha8686.neocities.org/learning/cryptopals/set1/#guessing-the-keysize
+pub fn guess_keysize(ciphertext: &Data) -> u32 {
     const MAX_KEYSIZE: u32 = 40;
     let Some(res) = (2u32..=MAX_KEYSIZE).min_by_key(|keysize| {
-        let (score, count, _) =
-            data.chunks_exact(*keysize as usize)
-                .fold((0, 0, None), |(acc, n, prev), chunk| {
-                    let res = prev.map_or(0, |prev: &[u8]| {
-                        let prev = Data::from(prev);
-                        let chunk = Data::from(chunk);
-                        prev.hamming_distance(&chunk)
-                            .expect("chunks should be equally sized")
-                    });
-                    (acc + res, n + 1, Some(chunk))
+        let (score, count, _) = ciphertext.chunks_exact(*keysize as usize).fold(
+            (0, 0, None),
+            |(acc, n, prev), chunk| {
+                let res = prev.map_or(0, |prev: &[u8]| {
+                    let prev = Data::from(prev);
+                    let chunk = Data::from(chunk);
+                    prev.hamming_distance(&chunk)
+                        .expect("chunks should be equally sized")
                 });
+                (acc + res, n + 1, Some(chunk))
+            },
+        );
         score * 100 / count / *keysize
     }) else {
         unreachable!()
@@ -57,8 +124,28 @@ fn guess_keysize(data: &Data) -> u32 {
     res
 }
 
-fn partition(data: &Data, keysize: u32) -> Vec<Data> {
-    data.iter()
+/// Partition a ciphertext into `keysize` different blocks in a cyclic (modulo) fashion.
+///
+/// Assuming a certain `ciphertext` is encrypted with a key of length `keysize`, each resulting
+/// block will contain the bytes from `ciphertext` encrypted with the same byte from the key.
+///
+/// ```txt
+///             ┌ keysize = 4
+///             ├───┬───┬───┬───┬───┬───┬───┐
+///      i % 4: 01230123012301230123012301
+///        key: meowmeowmeowmeowmeowmeowme
+/// ciphertext: qwertyuiopasdfghjklzxcvbnm
+///             │   │   │   │   │   │   │
+///        key: m   m   m   m   m   m   m ─► mmmmmmm
+/// ciphertext: q   t   o   d   j   x   n ─► qtodjxn
+///      i    : 0   4   8  12  16  20  24
+///      i % 4: 0   0   0   0   0   0   0
+/// ```
+///
+/// This algorithm's time complexity is `O(n)`.
+pub fn partition(ciphertext: &Data, keysize: u32) -> Vec<Data> {
+    ciphertext
+        .iter()
         .copied()
         .zip(0u32..)
         .into_group_map_by(|(_, i)| i % keysize)
@@ -69,7 +156,13 @@ fn partition(data: &Data, keysize: u32) -> Vec<Data> {
         .collect_vec()
 }
 
-fn unpartition(partitions: Vec<Data>) -> Data {
+/// Combine multiple partitions of a [`partition`ed][partition] ciphertext back in the original
+/// order.
+///
+/// Given a list of partitions generated by [`partition()`], this function reconstructs the
+/// data into the original ordering. Relative to the original data length `n`, this algorithm is
+/// `O(n)`.
+pub fn unpartition(partitions: Vec<Data>) -> Data {
     let keysize = partitions.len();
     let bytes = partitions
         .into_iter()
