@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter, Result as FmtResult};
+
 use crate::{
     AesCbc, AesEcb, Data, Result,
     cipher::{Cipher, aes_ecb},
@@ -10,12 +12,28 @@ use rand::Rng;
 
 use super::Blackbox;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Tags to differentiate which AES block cipher mode is used for the [`AesEcbOrCbc`] blackbox, for
+/// testing and debugging purposes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EcbOrCbc {
+    /// [AES-ECB][AesEcb] mode.
     Ecb,
+    /// [AES-CBC][AesEcb] mode.
     Cbc,
 }
 
+impl Display for EcbOrCbc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let s = match self {
+            EcbOrCbc::Ecb => "ECB",
+            EcbOrCbc::Cbc => "CBC",
+        };
+        write!(f, "{s}")
+    }
+}
+
+/// Blackbox that encrypts under AES-128, randomly switching between [ECB][AesEcb] and [CBC][AesCbc] block cipher
+/// modes unless otherwise set.
 #[derive(Debug, Clone)]
 pub struct AesEcbOrCbc {
     cipher: Aes128,
@@ -23,6 +41,7 @@ pub struct AesEcbOrCbc {
 }
 
 impl AesEcbOrCbc {
+    /// Create a new ECB or CBC blackbox, optionally fixing the mode to [ECB][AesEcb] or [CBC][AesCbc].
     #[must_use]
     pub fn new(mode: Option<EcbOrCbc>) -> Self {
         let key: [u8; 16] = rand::random();
@@ -69,6 +88,12 @@ impl Blackbox for AesEcbOrCbc {
     }
 }
 
+/// Determine whether an AES blackbox is encrypting using [ECB][AesEcb].
+///
+/// Note that the return type is currently [`EcbOrCbc`]; this may change at a future point,
+/// especially given the planned implementation of [CTR mode] for future challenges.
+///
+/// [CTR mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CTR
 pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Result<EcbOrCbc> {
     const BLOCKSIZE: usize = 16;
     let data = Data::from([b'A'; BLOCKSIZE * 3]);

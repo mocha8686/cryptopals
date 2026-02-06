@@ -1,3 +1,5 @@
+#![allow(missing_docs)] // TODO: remove when done with 2-12
+
 use aes::{
     Aes128,
     cipher::{KeyInit, generic_array::GenericArray},

@@ -2,11 +2,17 @@
 
 use crate::Data;
 
-pub mod aes_ecb_cbc;
-pub mod aes_ecb_prefix;
+mod aes_ecb_cbc;
+mod aes_ecb_prefix;
 
+pub use aes_ecb_cbc::{AesEcbOrCbc, EcbOrCbc, detect_aes_mode};
+pub use aes_ecb_prefix::AesEcbPrefix;
+
+/// Interface for implementing a blackbox.
 pub trait Blackbox {
+    /// Associated error type for possible errors during processing.
     type Error;
 
+    /// Transform a piece of data in any arbitrary fashion.
     fn process(&mut self, data: &Data) -> Result<Data, Self::Error>;
 }
