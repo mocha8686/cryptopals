@@ -11,6 +11,10 @@ use super::Cipher;
 const BLOCKSIZE: u8 = 16;
 const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
 
+/// Cipher for [AES-128] under [CBC mode].
+///
+/// [AES-128]: https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+/// [CBC mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC
 #[derive(Debug, Clone)]
 pub struct AesCbc {
     cipher: Aes128,
@@ -18,6 +22,7 @@ pub struct AesCbc {
 }
 
 impl AesCbc {
+    /// Create a new AES-CBC cipher with a specified key and initialization vector.
     pub fn new(key: impl AsRef<[u8]>, iv: impl AsRef<[u8]>) -> Result<Self> {
         let key = key.as_ref();
         let iv = iv.as_ref();
@@ -37,8 +42,9 @@ impl AesCbc {
         Ok(Self::init(cipher, iv))
     }
 
+    /// Initialize an AES-CBC cipher with a pre-existing [`Aes128`] struct and an IV array.
     #[must_use]
-    pub fn init(cipher: Aes128, iv: [u8; BLOCKSIZE_USIZE]) -> Self {
+    pub(crate) fn init(cipher: Aes128, iv: [u8; BLOCKSIZE_USIZE]) -> Self {
         Self { cipher, iv }
     }
 }

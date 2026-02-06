@@ -11,6 +11,12 @@ use super::Cipher;
 const BLOCKSIZE: u8 = 16;
 const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
 
+/// Cipher for [AES-128] under [ECB mode].
+///
+/// ECB is extremely vulnerable and should not be used in production applications.
+///
+/// [AES-128]: https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
+/// [ECB mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_codebook_(ECB)
 #[derive(Debug, Clone)]
 pub struct AesEcb {
     cipher: Aes128,
@@ -18,6 +24,8 @@ pub struct AesEcb {
 }
 
 impl AesEcb {
+    /// Create a new AES-CBC cipher with a specified key and optional
+    /// [padding via PKCS#7][Data::pad()].
     pub fn new(key: impl AsRef<[u8]>, pad: bool) -> Result<Self> {
         let key = key.as_ref();
         let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
@@ -29,8 +37,10 @@ impl AesEcb {
         Ok(Self::init(cipher, pad))
     }
 
+    /// Initialize an AES-ECB cipher with a pre-existing [`Aes128`] struct and optional
+    /// [padding via PKCS#7][Data::pad()].
     #[must_use]
-    pub fn init(cipher: Aes128, pad: bool) -> Self {
+    pub(crate) fn init(cipher: Aes128, pad: bool) -> Self {
         Self { cipher, pad }
     }
 }
