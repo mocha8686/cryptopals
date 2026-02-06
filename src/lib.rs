@@ -1,5 +1,8 @@
 //! A collection of tools for completing the [cryptopals crypto challenges](https://cryptopals.com).
 //!
+//! The heart of this crate is the [`Data`] type, which holds bytes and defines many
+//! useful operations to transform those bytes.
+//!
 //! Functionality is split into modules, grouped by general usage:
 //! - [`cipher`] – Working with ciphers such as XOR, AES-128 in ECB or CBC mode, and others
 //! - [`blackbox`] – Mock implementations of real-life systems for testing attacks

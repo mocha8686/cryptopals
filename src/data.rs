@@ -3,12 +3,14 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-pub mod base64;
-pub mod hamming_distance;
-pub mod hex;
-pub mod pad;
-pub mod xor;
+mod base64;
+mod hamming_distance;
+mod hex;
+mod pad;
+mod xor;
 
+/// The main struct for manipulating bytes with [ciphers][crate::cipher],
+/// [blackboxes][crate::blackbox], and other transformations.
 #[derive(Debug, Clone)]
 pub struct Data(pub(crate) Box<[u8]>);
 

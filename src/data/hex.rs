@@ -6,6 +6,7 @@ use crate::{Result, error::{INPUT_CHUNK_SIZE, ParseError}};
 use super::Data;
 
 impl Data {
+    /// Parse a hex string into the bytes, storing it into a [`Data`] struct.
     pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = hex::decode(&input).map_err(|e| ParseError::Hex {
             input: input.as_ref().chunks(INPUT_CHUNK_SIZE).map(String::from_utf8_lossy).join("\n"),
@@ -19,6 +20,7 @@ impl Data {
         Ok(res)
     }
 
+    /// Create a hex string using this [`Data`]'s bytes.
     #[must_use]
     pub fn hex(&self) -> String {
         hex::encode(self)

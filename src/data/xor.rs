@@ -3,6 +3,9 @@ use std::ops::BitXor;
 use super::Data;
 
 impl Data {
+    /// Perform an element-wise XOR between two pieces of [`Data`], looping back to the start of the
+    /// shorter [`Data`], if there is one. The returned [`Data`]'s length is equal to
+    /// `max(lhs.len(), rhs.len())`.
     #[must_use]
     pub fn xor(&self, other: &Self) -> Self {
         let len = self.len().max(other.len());

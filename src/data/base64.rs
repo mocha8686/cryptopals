@@ -14,6 +14,9 @@ use super::Data;
 const ENGINE: GeneralPurpose = STANDARD;
 
 impl Data {
+    /// Parse a [Base64] string into the bytes, storing it into a [`Data`] struct.
+    ///
+    /// [Base64]: https://en.wikipedia.org/wiki/Base64
     pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = ENGINE.decode(&input).map_err(|e| ParseError::Base64 {
             input: input
@@ -32,6 +35,9 @@ impl Data {
         Ok(res)
     }
 
+    /// Create a [Base64] string using this [`Data`]'s bytes.
+    ///
+    /// [Base64]: https://en.wikipedia.org/wiki/Base64
     #[must_use]
     pub fn base64(&self) -> String {
         ENGINE.encode(self)

@@ -1,6 +1,12 @@
 use crate::Data;
 
 impl Data {
+    /// Calculate the [Hamming distance] between two [`Data`]'s bytes.
+    ///
+    /// Equivalently, given two [`Data`]'s, `lhs` and `rhs`, calculate the number of ones in the
+    /// binary representation of `lhs ^ rhs`.
+    ///
+    /// [Hamming distance]: https://en.wikipedia.org/wiki/Hamming_distance
     #[must_use]
     pub fn hamming_distance(&self, other: &Self) -> Option<u32> {
         if self.len() == other.len() {

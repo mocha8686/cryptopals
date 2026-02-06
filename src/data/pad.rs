@@ -3,6 +3,10 @@ use itertools::Itertools;
 use crate::{Data, Result, error::PaddingError};
 
 impl Data {
+    /// Pad a piece of [`Data`] to the next multiple of `blocksize` using [the PKCS #7
+    /// standard][PKCS7].
+    ///
+    /// [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
     #[expect(
         clippy::cast_possible_truncation,
         reason = "modulo wraps usize into u8"
@@ -26,6 +30,10 @@ impl Data {
         Data::from(bytes)
     }
 
+    /// Remove padding from a piece of [`Data`] using the last byte as the `blocksize`, as in
+    /// [the PKCS #7 standard][PKCS7].
+    ///
+    /// [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
     pub fn unpad(&self) -> Result<Data> {
         let Some(&padding) = self.last() else {
             return Ok(self.clone());
