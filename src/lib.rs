@@ -7,17 +7,24 @@
 //! - [`attack`] – Attacks on different [ciphers][cipher] and [blackboxes][blackbox]
 //!
 //! ```rust
+//! # use cryptopals::Result;
+//! #
+//! # fn main() -> Result<()> {
 //! use cryptopals::{Data, attack::xor::single_byte_xor};
 //!
 //! let hex = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 //!
-//! let ciphertext = Data::from_hex(hex).expect("Hex should be valid");
+//! let ciphertext = Data::from_hex(hex)?;
 //! let (key, res) = single_byte_xor(&ciphertext);
 //!
 //! assert_eq!('X', key.into());
 //! assert_eq!("Cooking MC's like a pound of bacon", res.to_string());
+//!
+//! # Ok(())
+//! # }
 //! ```
 
+// TODO: add examples everywhere
 #![warn(missing_docs, clippy::missing_docs_in_private_items)]
 
 pub mod attack;
