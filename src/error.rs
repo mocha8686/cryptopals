@@ -5,100 +5,43 @@
     reason = "compiler doesn't play nicely with miette error reporting"
 )]
 
-use std::fmt::Display;
-
 use miette::Diagnostic;
 use thiserror::Error;
 
+mod cipher;
+mod padding;
+mod parse;
+
+pub use cipher::{CipherError, CipherErrorType, InvalidLengthType};
+pub use padding::PaddingError;
+pub use parse::ParseError;
+
+/// Helper wrapper around [`core::result::Result`], pre-defined to use the [crate
+/// `Error`][crate::Error] type.
 pub type Result<T> = core::result::Result<T, Error>;
 
+/// Defines the maximum length of a line for splitting up a long input string in an error (e.g.
+/// when including the original string in a [hex parsing error][ParseError::Hex]).
 pub(crate) const INPUT_CHUNK_SIZE: usize = 32;
 
+/// Main error type.
+///
+/// See documentation for wrapped types for more info on each error.
+#[allow(
+    missing_docs,
+    reason = "all items are transparent, docs are the same as the inner type's docs"
+)]
 #[derive(Error, Debug, Diagnostic, Clone, PartialEq)]
 pub enum Error {
-    #[error("Couldn't parse input into `Data`")]
+    #[error(transparent)]
     #[diagnostic(transparent)]
-    ParseError(#[from] ParseError),
-
-    // #[error("Couldn't decode input using {cipher}")]
-    // DecodeError {
-    //     cipher: String,
-    // },
-    #[error("Invalid {kind} length (expected `{expected}`, got `{actual}`)")]
-    InvalidLength {
-        kind: InvalidLengthType,
-        expected: usize,
-        actual: usize,
-    },
+    CipherError(#[from] CipherError),
 
     #[error("Couldn't strip padding from `Data`")]
     #[diagnostic(transparent)]
     PaddingError(#[from] PaddingError),
-}
 
-#[derive(Error, Debug, Diagnostic, Clone, PartialEq)]
-pub enum PaddingError {
-    #[error("Input too short for padding byte (padding byte: {byte}, length: {len})")]
-    #[diagnostic(code("cryptopals::padding::input_too_short"), url(docsrs))]
-    InputTooShort { byte: u8, len: usize },
-
-    #[error("Invalid padding (padding byte: `{byte:#04x}`)")]
-    #[diagnostic(code("cryptopals::padding::invalid_padding"), url(docsrs))]
-    InvalidPadding {
-        byte: u8,
-
-        #[source_code]
-        input: String,
-
-        #[label = "here"]
-        label: (usize, usize),
-    },
-}
-
-#[derive(Error, Debug, Diagnostic, Clone, PartialEq)]
-pub enum ParseError {
-    #[error("Couldn't parse hex string")]
-    #[diagnostic(code("cryptopals::parse::hex"), url(docsrs))]
-    Hex {
-        #[source_code]
-        input: String,
-
-        #[label = "here"]
-        label: Option<usize>,
-
-        #[source]
-        source: hex::FromHexError,
-    },
-
-    #[error("Couldn't parse base64 string")]
-    #[diagnostic(code("cryptopals::parse::base64"), url(docsrs))]
-    Base64 {
-        #[source_code]
-        input: String,
-
-        #[label = "here"]
-        label: Option<usize>,
-
-        #[source]
-        source: base64::DecodeError,
-    },
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum InvalidLengthType {
-    Block,
-    Key,
-    IV,
-}
-
-impl Display for InvalidLengthType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            InvalidLengthType::Block => "block",
-            InvalidLengthType::Key => "key",
-            InvalidLengthType::IV => "IV",
-        };
-
-        write!(f, "{s}")
-    }
+    #[error("Couldn't parse input into `Data`")]
+    #[diagnostic(transparent)]
+    ParseError(#[from] ParseError),
 }

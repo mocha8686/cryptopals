@@ -4,12 +4,17 @@ use aes::{
 };
 use itertools::Itertools;
 
-use crate::{Data, Error, Result, cipher::aes_ecb::AesEcb, error::InvalidLengthType};
+use crate::{
+    Data, Error, Result,
+    cipher::aes_ecb::AesEcb,
+    error::{CipherError, CipherErrorType, InvalidLengthType},
+};
 
 use super::Cipher;
 
 const BLOCKSIZE: u8 = 16;
 const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
+const CIPHER_NAME: &str = "AES-CBC";
 
 /// Cipher for [AES-128] under [CBC mode].
 ///
@@ -27,16 +32,26 @@ impl AesCbc {
         let key = key.as_ref();
         let iv = iv.as_ref();
 
-        let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
-            kind: InvalidLengthType::Key,
-            expected: BLOCKSIZE_USIZE,
-            actual: key.len(),
+        let cipher = Aes128::new_from_slice(key).map_err(|_| {
+            Error::CipherError(CipherError {
+                cipher_name: CIPHER_NAME,
+                kind: CipherErrorType::InvalidLength {
+                    kind: InvalidLengthType::Key,
+                    expected: BLOCKSIZE_USIZE,
+                    actual: key.len(),
+                },
+            })
         })?;
 
-        let iv = iv.try_into().map_err(|_| Error::InvalidLength {
-            kind: InvalidLengthType::IV,
-            expected: BLOCKSIZE_USIZE,
-            actual: iv.len(),
+        let iv = iv.try_into().map_err(|_| {
+            Error::CipherError(CipherError {
+                cipher_name: CIPHER_NAME,
+                kind: CipherErrorType::InvalidLength {
+                    kind: InvalidLengthType::IV,
+                    expected: BLOCKSIZE_USIZE,
+                    actual: iv.len(),
+                },
+            })
         })?;
 
         Ok(Self::init(cipher, iv))

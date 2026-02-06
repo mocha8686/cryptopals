@@ -4,12 +4,16 @@ use aes::{
 };
 use itertools::Itertools;
 
-use crate::{Data, Error, Result, error::InvalidLengthType};
+use crate::{
+    Data, Error, Result,
+    error::{CipherError, CipherErrorType, InvalidLengthType},
+};
 
 use super::Cipher;
 
 const BLOCKSIZE: u8 = 16;
 const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
+const CIPHER_NAME: &str = "AES-ECB";
 
 /// Cipher for [AES-128] under [ECB mode].
 ///
@@ -28,10 +32,15 @@ impl AesEcb {
     /// [padding via PKCS#7][Data::pad()].
     pub fn new(key: impl AsRef<[u8]>, pad: bool) -> Result<Self> {
         let key = key.as_ref();
-        let cipher = Aes128::new_from_slice(key).map_err(|_| Error::InvalidLength {
-            kind: InvalidLengthType::Key,
-            expected: BLOCKSIZE_USIZE,
-            actual: key.len(),
+        let cipher = Aes128::new_from_slice(key).map_err(|_| {
+            Error::CipherError(CipherError {
+                cipher_name: CIPHER_NAME,
+                kind: CipherErrorType::InvalidLength {
+                    kind: InvalidLengthType::Key,
+                    expected: BLOCKSIZE_USIZE,
+                    actual: key.len(),
+                },
+            })
         })?;
 
         Ok(Self::init(cipher, pad))
@@ -53,11 +62,14 @@ impl Cipher for AesEcb {
             .chunks(BLOCKSIZE_USIZE)
             .map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
             .map(|o| {
-                o.ok_or(Error::InvalidLength {
-                    kind: InvalidLengthType::Block,
-                    expected: BLOCKSIZE_USIZE,
-                    actual: data.len() / BLOCKSIZE_USIZE,
-                })
+                o.ok_or(Error::CipherError(CipherError {
+                    cipher_name: CIPHER_NAME,
+                    kind: CipherErrorType::InvalidLength {
+                        kind: InvalidLengthType::Block,
+                        expected: BLOCKSIZE_USIZE,
+                        actual: data.len() / BLOCKSIZE_USIZE,
+                    },
+                }))
             })
             .map_ok(GenericArray::from)
             .map_ok(|mut block| {
@@ -82,11 +94,14 @@ impl Cipher for AesEcb {
             .chunks(BLOCKSIZE_USIZE)
             .map(|s| itertools::Itertools::collect_array::<BLOCKSIZE_USIZE>(s.iter().copied()))
             .map(|o| {
-                o.ok_or(Error::InvalidLength {
-                    kind: InvalidLengthType::Block,
-                    expected: BLOCKSIZE_USIZE,
-                    actual: data.len() / BLOCKSIZE_USIZE,
-                })
+                o.ok_or(Error::CipherError(CipherError {
+                    cipher_name: CIPHER_NAME,
+                    kind: CipherErrorType::InvalidLength {
+                        kind: InvalidLengthType::Block,
+                        expected: BLOCKSIZE_USIZE,
+                        actual: data.len() / BLOCKSIZE_USIZE,
+                    },
+                }))
             })
             .map_ok(GenericArray::from)
             .map_ok(|mut block| {
