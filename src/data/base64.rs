@@ -26,16 +26,11 @@ impl Data {
     /// [Base64]: https://en.wikipedia.org/wiki/Base64
     pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = ENGINE.decode(&input).map_err(|e| {
-            let input = input.as_ref();
-            let input_len = input.len();
-
             ParseError::Base64 {
-                input: format_error_input(input, false),
+                input: format_error_input(input.as_ref(), false),
                 label: match e {
                     DecodeError::InvalidByte(index, _)
-                    | DecodeError::InvalidLastSymbol(index, _) => {
-                        Some(map_label_index(index, input_len))
-                    }
+                    | DecodeError::InvalidLastSymbol(index, _) => Some(map_label_index(index)),
                     _ => None,
                 },
                 source: e,

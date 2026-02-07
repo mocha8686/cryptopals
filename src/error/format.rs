@@ -25,24 +25,24 @@ pub(crate) fn format_error_input(input: &[u8], hexify: bool) -> String {
 
 /// Map a label index from an original input to its new position after a [`format_error_input()`], where
 /// `hexify == false`.
-pub(crate) fn map_label_index(index: usize, input_len: usize) -> usize {
-    let preceding_newlines = input_len / INPUT_CHUNK_SIZE;
+pub(crate) fn map_label_index(index: usize) -> usize {
+    let preceding_newlines = index / INPUT_CHUNK_SIZE;
     index + preceding_newlines
 }
 
 /// Map a label index and length pair from an original input to its new position after a
 /// [`format_error_input()`], where `hexify == false`.
-pub(crate) fn map_label_index_length(index: usize, len: usize, input_len: usize) -> (usize, usize) {
-    let start = map_label_index(index, input_len);
-    let end = map_label_index(index + len, input_len);
-    let len = end - start;
+pub(crate) fn map_label_index_length(index: usize, len: usize) -> (usize, usize) {
+    let start = map_label_index(index);
+    let end = map_label_index(index + len - 1);
+    let len = end - start + 1;
     (start, len)
 }
 
 /// Map a label index from an original input to its new position after a [`format_error_input()`], where
 /// `hexify == true`.
-pub(crate) fn map_label_index_hex(index: usize, input_len: usize) -> (usize, usize) {
-    let start = map_label_index(index * 2, input_len * 2);
+pub(crate) fn map_label_index_hex(index: usize) -> (usize, usize) {
+    let start = map_label_index(index * 2);
     (start, start + 1)
 }
 
@@ -51,10 +51,9 @@ pub(crate) fn map_label_index_hex(index: usize, input_len: usize) -> (usize, usi
 pub(crate) fn map_label_index_length_hex(
     index: usize,
     len: usize,
-    input_len: usize,
 ) -> (usize, usize) {
-    let (start, _) = map_label_index_hex(index, input_len);
-    let (_, end) = map_label_index_hex(index + len, input_len);
-    let len = end - start;
+    let (start, _) = map_label_index_hex(index);
+    let (_, end) = map_label_index_hex(index + len - 1);
+    let len = end - start + 1;
     (start, len)
 }

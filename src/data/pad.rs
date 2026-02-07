@@ -62,7 +62,7 @@ impl Data {
             return Err(PaddingError::InvalidPadding {
                 byte: padding,
                 input: format_error_input(self, true),
-                label: map_label_index_length_hex(start, padding as usize, len),
+                label: map_label_index_length_hex(start, padding as usize),
             }
             .into());
         }

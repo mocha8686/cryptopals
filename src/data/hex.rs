@@ -17,20 +17,13 @@ impl Data {
     /// Returns an error if the string isn't an even length, or if there's an invalid character
     /// (that is, not in `[0-9A-Fa-f]`).
     pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
-        let bytes = hex::decode(&input).map_err(|e| {
-            let input = input.as_ref();
-            let input_len = input.len();
-
-            ParseError::Hex {
-                input: format_error_input(input, false),
-                label: match e {
-                    FromHexError::InvalidHexCharacter { index, .. } => {
-                        Some(map_label_index(index, input_len))
-                    }
-                    _ => None,
-                },
-                source: e,
-            }
+        let bytes = hex::decode(&input).map_err(|e| ParseError::Hex {
+            input: format_error_input(input.as_ref(), false),
+            label: match e {
+                FromHexError::InvalidHexCharacter { index, .. } => Some(map_label_index(index)),
+                _ => None,
+            },
+            source: e,
         })?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)
