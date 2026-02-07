@@ -1,3 +1,5 @@
+//! Implementation of the [`AesEcbOrCbc`] blackbox.
+
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use crate::{
@@ -36,7 +38,10 @@ impl Display for EcbOrCbc {
 /// modes unless otherwise set.
 #[derive(Debug, Clone)]
 pub struct AesEcbOrCbc {
+    /// Underlying cipher.
     cipher: Aes128,
+
+    /// Optionally fix the cipher's mode to [ECB][AesEcb] or [CBC][AesCbc].
     mode: Option<EcbOrCbc>,
 }
 
@@ -94,6 +99,10 @@ impl Blackbox for AesEcbOrCbc {
 /// especially given the planned implementation of [CTR mode] for future challenges.
 ///
 /// [CTR mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CTR
+///
+/// # Errors
+///
+/// Returns an error if the `blackbox` fails to process an arbitrary payload.
 pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Result<EcbOrCbc> {
     const BLOCKSIZE: usize = 16;
     let data = Data::from([b'A'; BLOCKSIZE * 3]);

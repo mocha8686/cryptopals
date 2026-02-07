@@ -1,3 +1,5 @@
+//! [`hamming_distance()`][Data::hamming_distance()] implementation.
+
 use crate::Data;
 
 impl Data {
@@ -5,6 +7,8 @@ impl Data {
     ///
     /// Equivalently, given two [`Data`]'s, `lhs` and `rhs`, calculate the number of ones in the
     /// binary representation of `lhs ^ rhs`.
+    ///
+    /// Returns `None` if `lhs.len() != rhs.len()`.
     ///
     /// [Hamming distance]: https://en.wikipedia.org/wiki/Hamming_distance
     #[must_use]

@@ -17,8 +17,10 @@ pub trait Cipher {
     type Error;
 
     /// Decrypt a piece of data using the cipher.
+    #[allow(clippy::missing_errors_doc, reason = "error is implementation-defined")]
     fn decrypt(&mut self, data: &Data) -> Result<Data, Self::Error>;
 
     /// Encrypt a piece of data using the cipher.
+    #[allow(clippy::missing_errors_doc, reason = "error is implementation-defined")]
     fn encrypt(&mut self, data: &Data) -> Result<Data, Self::Error>;
 }

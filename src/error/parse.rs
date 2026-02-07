@@ -1,3 +1,5 @@
+//! Errors related to parsing strings of certain input formats to [`Data`] structs.
+
 use miette::Diagnostic;
 use thiserror::Error;
 

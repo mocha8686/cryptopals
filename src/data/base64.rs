@@ -1,3 +1,5 @@
+//! Base64 string handling.
+
 use base64::{
     DecodeError, Engine,
     engine::{GeneralPurpose, general_purpose::STANDARD},
@@ -10,10 +12,16 @@ use crate::{
 
 use super::Data;
 
+/// Default [`base64::Engine`] to use.
 const ENGINE: GeneralPurpose = STANDARD;
 
 impl Data {
     /// Parse a [Base64] string into the bytes, storing it into a [`Data`] struct.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `input` has invalid characters or padding, or if it's otherwise not
+    /// valid Base64.
     ///
     /// [Base64]: https://en.wikipedia.org/wiki/Base64
     pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
@@ -25,7 +33,9 @@ impl Data {
                 input: format_error_input(input, false),
                 label: match e {
                     DecodeError::InvalidByte(index, _)
-                    | DecodeError::InvalidLastSymbol(index, _) => Some(map_label_index(index, input_len)),
+                    | DecodeError::InvalidLastSymbol(index, _) => {
+                        Some(map_label_index(index, input_len))
+                    }
                     _ => None,
                 },
                 source: e,

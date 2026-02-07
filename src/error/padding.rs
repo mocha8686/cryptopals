@@ -1,3 +1,6 @@
+//! Errors related to [`Data::pad()`][crate::Data::pad()] and
+//! [`Data::unpad()`][crate::Data::unpad()].
+
 use miette::Diagnostic;
 use thiserror::Error;
 

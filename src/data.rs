@@ -1,3 +1,5 @@
+//! [`Data`] struct definition, trait impls, and other methods.
+
 use std::{
     fmt::Display,
     ops::{Deref, DerefMut},

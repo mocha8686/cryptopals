@@ -1,3 +1,7 @@
+//! Implementation for the [`AesEcb`] cipher.
+
+#![allow(clippy::missing_docs_in_private_items, reason = "self-documenting")]
+
 use aes::{
     Aes128,
     cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit, generic_array::GenericArray},
@@ -11,8 +15,13 @@ use crate::{
 
 use super::Cipher;
 
+/// Cipher blocksize.
 const BLOCKSIZE: u8 = 16;
+
+/// Cipher blocksize, as a [`usize`].
 const BLOCKSIZE_USIZE: usize = BLOCKSIZE as usize;
+
+/// Name of the cipher.
 const CIPHER_NAME: &str = "AES-ECB";
 
 /// Cipher for [AES-128] under [ECB mode].
@@ -30,6 +39,10 @@ pub struct AesEcb {
 impl AesEcb {
     /// Create a new AES-CBC cipher with a specified key and optional
     /// [padding via PKCS#7][Data::pad()].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the `key` isn't exactly 16 bytes long.
     pub fn new(key: impl AsRef<[u8]>, pad: bool) -> Result<Self> {
         let key = key.as_ref();
         let cipher = Aes128::new_from_slice(key).map_err(|_| {

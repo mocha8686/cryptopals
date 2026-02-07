@@ -1,3 +1,7 @@
+//! [PKCS #7 padding][PKCS7] implementation.
+//!
+//! [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
+
 use itertools::Itertools;
 
 use crate::{
@@ -36,6 +40,10 @@ impl Data {
     /// Remove padding from a piece of [`Data`] using the last byte as the `blocksize`, as in
     /// [the PKCS #7 standard][PKCS7].
     ///
+    /// # Errors
+    ///
+    /// Returns an error if the padding is invalid. See [`PaddingError`] for more details.
+    ///
     /// [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
     pub fn unpad(&self) -> Result<Data> {
         let Some(&padding) = self.last() else {
@@ -53,7 +61,7 @@ impl Data {
 
             return Err(PaddingError::InvalidPadding {
                 byte: padding,
-                input: format_error_input(&self, true),
+                input: format_error_input(self, true),
                 label: map_label_index_length_hex(start, padding as usize, len),
             }
             .into());

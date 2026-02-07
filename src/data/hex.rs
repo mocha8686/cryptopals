@@ -1,3 +1,5 @@
+//! Hex string handling.
+
 use hex::FromHexError;
 
 use crate::{
@@ -9,6 +11,11 @@ use super::Data;
 
 impl Data {
     /// Parse a hex string into the bytes, storing it into a [`Data`] struct.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the string isn't an even length, or if there's an invalid character
+    /// (that is, not in `[0-9A-Fa-f]`).
     pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = hex::decode(&input).map_err(|e| {
             let input = input.as_ref();

@@ -1,3 +1,5 @@
+//! Repeating XOR implementation.
+
 use std::ops::BitXor;
 
 use super::Data;

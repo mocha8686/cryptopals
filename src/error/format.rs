@@ -1,3 +1,5 @@
+//! Helper functions for formatting error input strings.
+
 #![allow(dead_code, reason = "helper functions")]
 
 use itertools::Itertools;

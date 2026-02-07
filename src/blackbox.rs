@@ -14,5 +14,6 @@ pub trait Blackbox {
     type Error;
 
     /// Transform a piece of data in any arbitrary fashion.
+    #[allow(clippy::missing_errors_doc, reason = "error is implementation-defined")]
     fn process(&mut self, data: &Data) -> Result<Data, Self::Error>;
 }

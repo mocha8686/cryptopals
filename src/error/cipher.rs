@@ -1,3 +1,5 @@
+//! Errors related to [ciphers][crate::cipher].
+
 use std::fmt::Display;
 
 use miette::Diagnostic;
