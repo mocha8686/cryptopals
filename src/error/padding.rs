@@ -11,7 +11,7 @@ pub enum PaddingError {
         /// Padding byte.
         byte: u8,
 
-        /// Length of the input [`Data`].
+        /// Length of the input [`Data`][crate::Data].
         len: usize,
     },
 

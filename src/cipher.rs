@@ -1,7 +1,7 @@
 //! Ciphers for encrypting and decrypting text.
 //!
 //! For developing real applications, it's probably better to use a real, established library such
-//! as the ones by [the RustCrypto group][https://github.com/RustCrypto/].
+//! as the ones by [the RustCrypto group](https://github.com/RustCrypto/).
 
 use crate::Data;
 
