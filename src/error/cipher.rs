@@ -8,6 +8,7 @@ use thiserror::Error;
 /// Failure to construct or use a [cipher][crate::cipher].
 #[derive(Error, Debug, Diagnostic, Clone, PartialEq, Eq, Hash)]
 #[error("Cipher error with {cipher_name}: {kind}")]
+#[diagnostic(code("cryptopals::cipher"), url(docsrs))]
 pub struct CipherError {
     /// Name of the cipher.
     pub cipher_name: &'static str,
@@ -25,6 +26,7 @@ pub enum CipherErrorType {
     /// May either occur in construction (e.g. invalid-length keys or IVs), or in usage (e.g.
     /// invalid-length data blocks).
     #[error("Invalid {kind} length (expected `{expected}`, got `{actual}`)")]
+    #[diagnostic(code("cryptopals::cipher::invalid_length"), url(docsrs))]
     InvalidLength {
         /// Which cipher component had an invalid length.
         kind: InvalidLengthType,
