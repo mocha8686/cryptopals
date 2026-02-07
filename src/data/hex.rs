@@ -1,20 +1,29 @@
 use hex::FromHexError;
-use itertools::Itertools;
 
-use crate::{Result, error::{INPUT_CHUNK_SIZE, ParseError}};
+use crate::{
+    Result,
+    error::{ParseError, format_error_input, map_label_index},
+};
 
 use super::Data;
 
 impl Data {
     /// Parse a hex string into the bytes, storing it into a [`Data`] struct.
     pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
-        let bytes = hex::decode(&input).map_err(|e| ParseError::Hex {
-            input: input.as_ref().chunks(INPUT_CHUNK_SIZE).map(String::from_utf8_lossy).join("\n"),
-            label: match e {
-                FromHexError::InvalidHexCharacter { index, .. } => Some(index),
-                _ => None,
-            }.map(|i| i + (i / INPUT_CHUNK_SIZE)),
-            source: e,
+        let bytes = hex::decode(&input).map_err(|e| {
+            let input = input.as_ref();
+            let input_len = input.len();
+
+            ParseError::Hex {
+                input: format_error_input(input, false),
+                label: match e {
+                    FromHexError::InvalidHexCharacter { index, .. } => {
+                        Some(map_label_index(index, input_len))
+                    }
+                    _ => None,
+                },
+                source: e,
+            }
         })?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)

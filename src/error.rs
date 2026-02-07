@@ -9,6 +9,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 mod cipher;
+mod format;
 mod padding;
 mod parse;
 
@@ -16,13 +17,15 @@ pub use cipher::{CipherError, CipherErrorType, InvalidLengthType};
 pub use padding::PaddingError;
 pub use parse::ParseError;
 
+#[allow(unused_imports, reason = "helper functions")]
+pub(crate) use format::{
+    format_error_input, map_label_index, map_label_index_hex, map_label_index_length,
+    map_label_index_length_hex,
+};
+
 /// Helper wrapper around [`core::result::Result`], pre-defined to use the [crate
 /// `Error`][crate::Error] type.
 pub type Result<T> = core::result::Result<T, Error>;
-
-/// Defines the maximum length of a line for splitting up a long input string in an error (e.g.
-/// when including the original string in a [hex parsing error][ParseError::Hex]).
-pub(crate) const INPUT_CHUNK_SIZE: usize = 32;
 
 /// Main error type.
 ///

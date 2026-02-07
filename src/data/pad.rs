@@ -1,6 +1,9 @@
 use itertools::Itertools;
 
-use crate::{Data, Result, error::PaddingError};
+use crate::{
+    Data, Result,
+    error::{PaddingError, format_error_input, map_label_index_length_hex},
+};
 
 impl Data {
     /// Pad a piece of [`Data`] to the next multiple of `blocksize` using [the PKCS #7
@@ -46,16 +49,12 @@ impl Data {
             .ok_or(PaddingError::InputTooShort { byte: padding, len })?;
 
         if !last.iter().all(|b| *b == padding) {
-            let len2 = len * 2;
-            let padding2 = padding as usize * 2;
-
-            let start = len2 - padding2;
-            let length = padding2;
+            let start = len - padding as usize;
 
             return Err(PaddingError::InvalidPadding {
                 byte: padding,
-                input: self.hex(),
-                label: (start, length),
+                input: format_error_input(&self, true),
+                label: map_label_index_length_hex(start, padding as usize, len),
             }
             .into());
         }
