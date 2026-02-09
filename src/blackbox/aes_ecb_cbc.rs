@@ -36,6 +36,21 @@ impl Display for EcbOrCbc {
 
 /// Blackbox that encrypts under AES-128, randomly switching between [ECB][AesEcb] and [CBC][AesCbc] block cipher
 /// modes unless otherwise set.
+///
+/// # Examples
+///
+/// ```
+/// use cryptopals::{Data, blackbox::AesEcbOrCbc};
+///
+/// # fn main() -> crate::Result<()> {
+/// let mut blackbox = AesEcbOrCbc::new(None);
+/// let data = Data::from("Hello, world!".as_bytes());
+///
+/// let res = blackbox.process(&data)?;
+/// // `res` is either encrypted via ECB or CBC.
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone)]
 pub struct AesEcbOrCbc {
     /// Underlying cipher.
@@ -47,6 +62,18 @@ pub struct AesEcbOrCbc {
 
 impl AesEcbOrCbc {
     /// Create a new ECB or CBC blackbox, optionally fixing the mode to [ECB][AesEcb] or [CBC][AesCbc].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::{
+    ///     Data,
+    ///     blackbox::{AesEcbOrCbc, EcbOrCbc},
+    /// };
+    ///
+    /// let mut random = AesEcbOrCbc::new(None);
+    /// let mut always_ecb = AesEcbOrCbc::new(Some(EcbOrCbc::Ecb));
+    /// ```
     #[must_use]
     pub fn new(mode: Option<EcbOrCbc>) -> Self {
         let key: [u8; 16] = rand::random();
@@ -98,11 +125,25 @@ impl Blackbox for AesEcbOrCbc {
 /// Note that the return type is currently [`EcbOrCbc`]; this may change at a future point,
 /// especially given the planned implementation of [CTR mode] for future challenges.
 ///
-/// [CTR mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CTR
-///
 /// # Errors
 ///
 /// Returns an error if the `blackbox` fails to process an arbitrary payload.
+///
+/// # Examples
+///
+/// ```
+/// use cryptopals::blackbox::{AesEcbOrCbc, detect_aes_mode};
+///
+/// # fn main() -> crate::Result<()> {
+/// let mut blackbox = AesEcbOrCbc::new(Some(mode));
+/// let res = detect_aes_mode(&mut blackbox)?;
+/// assert_eq!(mode, res);
+/// # Ok(())
+/// # }
+/// ```
+///
+/// [CTR mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CTR
+// TODO: move to attack, change to -> bool and change to is_ecb
 pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Result<EcbOrCbc> {
     const BLOCKSIZE: usize = 16;
     let data = Data::from([b'A'; BLOCKSIZE * 3]);

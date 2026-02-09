@@ -1,7 +1,22 @@
 //! Mock implementations of certain vulnerable parts of real-world systems.
+//!
+//! # Examples
+//!
+//! ```
+//! use cryptopals::{Data, blackbox::AesEcbOrCbc};
+//!
+//! # fn main() -> crate::Result<()> {
+//! let mut blackbox = AesEcbOrCbc::new(None);
+//! let data = Data::from("Hello, world!".as_bytes());
+//!
+//! let res = blackbox.process(&data)?;
+//! // `res` is either encrypted via ECB or CBC.
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::Data;
-
+ 
 mod aes_ecb_cbc;
 mod aes_ecb_prefix;
 
