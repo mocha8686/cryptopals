@@ -40,9 +40,12 @@ impl Display for EcbOrCbc {
 /// # Examples
 ///
 /// ```
-/// use cryptopals::{Data, blackbox::AesEcbOrCbc};
+/// use cryptopals::{
+///     Data,
+///     blackbox::{AesEcbOrCbc, Blackbox},
+/// };
 ///
-/// # fn main() -> crate::Result<()> {
+/// # fn main() -> cryptopals::Result<()> {
 /// let mut blackbox = AesEcbOrCbc::new(None);
 /// let data = Data::from("Hello, world!".as_bytes());
 ///
@@ -68,7 +71,7 @@ impl AesEcbOrCbc {
     /// ```
     /// use cryptopals::{
     ///     Data,
-    ///     blackbox::{AesEcbOrCbc, EcbOrCbc},
+    ///     blackbox::{AesEcbOrCbc, Blackbox, EcbOrCbc},
     /// };
     ///
     /// let mut random = AesEcbOrCbc::new(None);
@@ -132,12 +135,17 @@ impl Blackbox for AesEcbOrCbc {
 /// # Examples
 ///
 /// ```
-/// use cryptopals::blackbox::{AesEcbOrCbc, detect_aes_mode};
+/// use cryptopals::blackbox::{
+///     AesEcbOrCbc,
+///     Blackbox,
+///     EcbOrCbc,
+///     detect_aes_mode,
+/// };
 ///
-/// # fn main() -> crate::Result<()> {
-/// let mut blackbox = AesEcbOrCbc::new(Some(mode));
+/// # fn main() -> cryptopals::Result<()> {
+/// let mut blackbox = AesEcbOrCbc::new(Some(EcbOrCbc::Ecb));
 /// let res = detect_aes_mode(&mut blackbox)?;
-/// assert_eq!(mode, res);
+/// assert_eq!(EcbOrCbc::Ecb, res);
 /// # Ok(())
 /// # }
 /// ```

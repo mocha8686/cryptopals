@@ -3,9 +3,12 @@
 //! # Examples
 //!
 //! ```
-//! use cryptopals::{Data, blackbox::AesEcbOrCbc};
+//! use cryptopals::{
+//!     Data,
+//!     blackbox::{AesEcbOrCbc, Blackbox},
+//! };
 //!
-//! # fn main() -> crate::Result<()> {
+//! # fn main() -> cryptopals::Result<()> {
 //! let mut blackbox = AesEcbOrCbc::new(None);
 //! let data = Data::from("Hello, world!".as_bytes());
 //!
