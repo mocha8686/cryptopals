@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use crate::{
     AesCbc, AesEcb, Data, Result,
-    cipher::{Cipher, aes_ecb},
+    cipher::{Cipher, aes_ecb_score},
 };
 use aes::{
     Aes128,
@@ -157,7 +157,7 @@ pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Res
     let data = Data::from([b'A'; BLOCKSIZE * 3]);
     let res = blackbox.process(&data)?;
 
-    let mode = if aes_ecb::score(&res) > 0 {
+    let mode = if aes_ecb_score(&res) > 0 {
         EcbOrCbc::Ecb
     } else {
         EcbOrCbc::Cbc

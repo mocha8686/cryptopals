@@ -128,12 +128,13 @@ impl Cipher for AesEcb {
     }
 }
 
+/// Calculate the number of repeating 16-byte blocks.
 #[must_use]
 #[allow(
     clippy::cast_possible_truncation,
     reason = "higher scores will be rare"
 )]
-pub fn score(bytes: &[u8]) -> u32 {
+pub fn aes_ecb_score(bytes: &[u8]) -> u32 {
     bytes
         .chunks_exact(BLOCKSIZE_USIZE)
         .counts()
