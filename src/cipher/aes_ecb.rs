@@ -31,7 +31,10 @@ pub const CIPHER_NAME: &str = "AES-ECB";
 /// # Examples
 ///
 /// ```
-/// use cryptopals::{Data, cipher::AesEcb};
+/// use cryptopals::{
+///     Data,
+///     cipher::{AesEcb, Cipher},
+/// };
 ///
 /// # fn main() -> cryptopals::Result<()> {
 /// let text = "CRIwqt4+szDbqkNY+I0qbDe3LQz0wiw0..."; // truncated
@@ -68,7 +71,10 @@ impl AesEcb {
     /// ```
     /// use cryptopals::cipher::AesEcb;
     ///
+    /// # fn main() -> cryptopals::Result<()> {
     /// let mut cipher = AesEcb::new("YELLOW SUBMARINE", true)?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new(key: impl AsRef<[u8]>, pad: bool) -> Result<Self> {
         let key = key.as_ref();

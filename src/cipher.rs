@@ -6,7 +6,10 @@
 //! # Examples
 //!
 //! ```
-//! use cryptopals::{Data, cipher::AesEcb};
+//! use cryptopals::{
+//!     Data,
+//!     cipher::{AesEcb, Cipher},
+//! };
 //!
 //! # fn main() -> cryptopals::Result<()> {
 //! let text = "CRIwqt4+szDbqkNY+I0qbDe3LQz0wiw0..."; // truncated
