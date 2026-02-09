@@ -10,6 +10,17 @@ impl Data {
     ///
     /// Returns `None` if `lhs.len() != rhs.len()`.
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// let lhs = Data::from("this is a test".as_bytes());
+    /// let rhs = Data::from("wokka wokka!!!".as_bytes());
+    /// let res = lhs.hamming_distance(&rhs);
+    /// assert_eq!(Some(37), res);
+    /// ```
+    ///
     /// [Hamming distance]: https://en.wikipedia.org/wiki/Hamming_distance
     #[must_use]
     pub fn hamming_distance(&self, other: &Self) -> Option<u32> {

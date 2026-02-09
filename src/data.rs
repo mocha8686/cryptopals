@@ -13,6 +13,18 @@ mod xor;
 
 /// The main struct for manipulating bytes with [ciphers][crate::cipher],
 /// [blackboxes][crate::blackbox], and other transformations.
+///
+/// # Examples
+///
+/// ```
+/// use cryptopals::Data;
+///
+/// let data1 = Data::from("hello, world!".as_bytes());
+/// let data2 = Data::from("alfredo sauce".as_bytes());
+///
+/// let hamming_distance = data1.hamming_distance(&data2);
+/// assert_eq!(Some(38), hamming_distance);
+/// ```
 #[derive(Debug, Clone)]
 pub struct Data(pub(crate) Box<[u8]>);
 

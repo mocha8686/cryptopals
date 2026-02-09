@@ -23,24 +23,45 @@ impl Data {
     /// Returns an error if `input` has invalid characters or padding, or if it's otherwise not
     /// valid Base64.
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// # fn main() -> cryptopals::Result<()> {
+    /// let data = Data::from_base64("aGVsbG8sIHdvcmxkIQ==")?;
+    /// assert_eq!("hello, world!", data.to_string());
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
     /// [Base64]: https://en.wikipedia.org/wiki/Base64
     pub fn from_base64(input: impl AsRef<[u8]>) -> Result<Self> {
-        let bytes = ENGINE.decode(&input).map_err(|e| {
-            ParseError::Base64 {
-                input: format_error_input(input.as_ref(), false),
-                label: match e {
-                    DecodeError::InvalidByte(index, _)
-                    | DecodeError::InvalidLastSymbol(index, _) => Some(map_label_index(index)),
-                    _ => None,
-                },
-                source: e,
-            }
+        let bytes = ENGINE.decode(&input).map_err(|e| ParseError::Base64 {
+            input: format_error_input(input.as_ref(), false),
+            label: match e {
+                DecodeError::InvalidByte(index, _) | DecodeError::InvalidLastSymbol(index, _) => {
+                    Some(map_label_index(index))
+                }
+                _ => None,
+            },
+            source: e,
         })?;
         let res = Self(bytes.into_boxed_slice());
         Ok(res)
     }
 
     /// Create a [Base64] string using this [`Data`]'s bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// let data = Data::from("hello, world!".as_bytes());
+    /// let base64 = data.base64();
+    /// assert_eq!("aGVsbG8sIHdvcmxkIQ==", base64);
+    /// ```
     ///
     /// [Base64]: https://en.wikipedia.org/wiki/Base64
     #[must_use]
@@ -57,7 +78,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn is_invertible() -> Result<()> {
+    fn is_involution() -> Result<()> {
         let s = "hello, world!";
         let data = Data::from_base64(&Data::from(s.as_bytes()).base64())?;
         assert_eq!(s, data);

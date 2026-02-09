@@ -13,6 +13,16 @@ impl Data {
     /// Pad a piece of [`Data`] to the next multiple of `blocksize` using [the PKCS #7
     /// standard][PKCS7].
     ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// let data = Data::from("hello".as_bytes());
+    /// let padded = data.pad(8);
+    /// assert_eq!("hello\x03\x03\x03", padded);
+    /// ```
+    ///
     /// [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
     #[expect(
         clippy::cast_possible_truncation,
@@ -43,6 +53,18 @@ impl Data {
     /// # Errors
     ///
     /// Returns an error if the padding is invalid. See [`PaddingError`] for more details.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// let data = Data::from("hello\x03\x03\x03".as_bytes());
+    /// let unpadded = data.unpad();
+    ///
+    /// let expected = Data::from("hello".as_bytes());
+    /// assert_eq!(Ok(expected), unpadded);
+    /// ```
     ///
     /// [PKCS7]: https://en.wikipedia.org/wiki/PKCS_7
     pub fn unpad(&self) -> Result<Data> {

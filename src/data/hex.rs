@@ -16,6 +16,18 @@ impl Data {
     ///
     /// Returns an error if the string isn't an even length, or if there's an invalid character
     /// (that is, not in `[0-9A-Fa-f]`).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// # fn main() -> cryptopals::Result<()> {
+    /// let data = Data::from_hex("68656c6c6f2c20776f726c6421")?;
+    /// assert_eq!("hello, world!", data.to_string());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn from_hex(input: impl AsRef<[u8]>) -> Result<Self> {
         let bytes = hex::decode(&input).map_err(|e| ParseError::Hex {
             input: format_error_input(input.as_ref(), false),
@@ -30,6 +42,16 @@ impl Data {
     }
 
     /// Create a hex string using this [`Data`]'s bytes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use cryptopals::Data;
+    ///
+    /// let data = Data::from("hello, world!".as_bytes());
+    /// let hex = data.hex();
+    /// assert_eq!("68656c6c6f2c20776f726c6421", hex);
+    /// ```
     #[must_use]
     pub fn hex(&self) -> String {
         hex::encode(self)
@@ -44,7 +66,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn is_invertible() -> Result<()> {
+    fn is_involution() -> Result<()> {
         let s = "hello, world!";
         let data = Data::from_hex(&Data::from(s.as_bytes()).hex())?;
         assert_eq!(s, data);
