@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 
 use crate::{
     AesCbc, AesEcb, Data, Result,
-    cipher::{Cipher, aes_ecb_score},
+    cipher::Cipher,
 };
 use aes::{
     Aes128,
@@ -123,60 +123,25 @@ impl Blackbox for AesEcbOrCbc {
     }
 }
 
-/// Determine whether an AES blackbox is encrypting using [ECB][AesEcb].
-///
-/// Note that the return type is currently [`EcbOrCbc`]; this may change at a future point,
-/// especially given the planned implementation of [CTR mode] for future challenges.
-///
-/// # Errors
-///
-/// Returns an error if the `blackbox` fails to process an arbitrary payload.
-///
-/// # Examples
-///
-/// ```
-/// use cryptopals::blackbox::{
-///     AesEcbOrCbc,
-///     Blackbox,
-///     EcbOrCbc,
-///     detect_aes_mode,
-/// };
-///
-/// # fn main() -> cryptopals::Result<()> {
-/// let mut blackbox = AesEcbOrCbc::new(Some(EcbOrCbc::Ecb));
-/// let res = detect_aes_mode(&mut blackbox)?;
-/// assert_eq!(EcbOrCbc::Ecb, res);
-/// # Ok(())
-/// # }
-/// ```
-///
-/// [CTR mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CTR
-// TODO: move to attack, change to -> bool and change to is_ecb
-pub fn detect_aes_mode(blackbox: &mut dyn Blackbox<Error = crate::Error>) -> Result<EcbOrCbc> {
-    const BLOCKSIZE: usize = 16;
-    let data = Data::from([b'A'; BLOCKSIZE * 3]);
-    let res = blackbox.process(&data)?;
-
-    let mode = if aes_ecb_score(&res) > 0 {
-        EcbOrCbc::Ecb
-    } else {
-        EcbOrCbc::Cbc
-    };
-
-    Ok(mode)
-}
-
 #[cfg(test)]
 mod tests {
     use miette::Result;
     use pretty_assertions::assert_eq;
 
+    use crate::attack::block::is_ecb;
+
     use super::*;
 
     fn test_mode(mode: EcbOrCbc) -> Result<()> {
         let mut blackbox = AesEcbOrCbc::new(Some(mode));
-        let res = detect_aes_mode(&mut blackbox)?;
-        assert_eq!(mode, res);
+        let res = is_ecb(&mut blackbox, 16)?;
+
+        let expected = match mode {
+            EcbOrCbc::Ecb => true,
+            EcbOrCbc::Cbc => false,
+        };
+        assert_eq!(expected, res);
+
         Ok(())
     }
 

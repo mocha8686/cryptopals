@@ -19,11 +19,11 @@
 //! ```
 
 use crate::Data;
- 
+
 mod aes_ecb_cbc;
 mod aes_ecb_prefix;
 
-pub use aes_ecb_cbc::{AesEcbOrCbc, EcbOrCbc, detect_aes_mode};
+pub use aes_ecb_cbc::{AesEcbOrCbc, EcbOrCbc};
 pub use aes_ecb_prefix::AesEcbPrefix;
 
 /// Interface for implementing a blackbox.

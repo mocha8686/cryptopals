@@ -161,25 +161,12 @@ impl Cipher for AesEcb {
     }
 }
 
-/// Calculate the number of repeating 16-byte blocks.
-#[must_use]
-#[allow(
-    clippy::cast_possible_truncation,
-    reason = "higher scores will be rare"
-)]
-pub fn aes_ecb_score(bytes: &[u8]) -> u32 {
-    bytes
-        .chunks_exact(BLOCKSIZE_USIZE)
-        .counts()
-        .into_values()
-        .map(|v| v.saturating_sub(1) as u32)
-        .sum()
-}
-
 #[cfg(test)]
 mod tests {
     use miette::Result;
     use pretty_assertions::assert_eq;
+
+    use crate::score;
 
     use super::*;
 
@@ -203,7 +190,7 @@ mod tests {
             .map(Data::from_hex)
             .collect::<crate::Result<Vec<_>>>()?
             .into_iter()
-            .max_by_key(|d| aes_ecb_score(d))
+            .max_by_key(|d| score::ecb_count(d, BLOCKSIZE_USIZE))
             .expect("data/8.txt should not be empty");
 
         assert_eq!(

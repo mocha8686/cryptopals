@@ -1,5 +1,6 @@
 //! Functions for scoring a piece of plaintext based on different metrics.
 
+use itertools::Itertools;
 use phf::phf_map;
 
 /// Frequency map of english letters (case-insensitive).
@@ -65,5 +66,22 @@ pub fn en_frequency_score(bytes: &[u8]) -> i32 {
         .iter()
         .map(u8::to_ascii_lowercase)
         .map(|b| EN_FREQUENCIES.get(&b).unwrap_or(&-1000))
+        .sum()
+}
+
+/// Count the number of repeating 16-byte blocks, useful for detecting encryption under [ECB mode].
+///
+/// [ECB mode]: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_codebook_(ECB)
+#[must_use]
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "higher scores will be rare"
+)]
+pub fn ecb_count(bytes: &[u8], blocksize: usize) -> u32 {
+    bytes
+        .chunks_exact(blocksize)
+        .counts()
+        .into_values()
+        .map(|v| v.saturating_sub(1) as u32)
         .sum()
 }

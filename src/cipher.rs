@@ -31,7 +31,7 @@ mod aes_cbc;
 mod aes_ecb;
 
 pub use aes_cbc::AesCbc;
-pub use aes_ecb::{AesEcb, aes_ecb_score};
+pub use aes_ecb::AesEcb;
 
 // TODO: impl Blackbox for Cipher
 /// Interface for defining a cipher.
